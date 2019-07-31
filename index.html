@@ -1,0 +1,31 @@
+<canvas id="canvas"></canvas>
+<div id="uiContainer">
+    <div id="ui">
+        <div id="x"></div>
+        <div id="y"></div>
+        <div id="z"></div>
+        <div id="angleX"></div>
+        <div id="angleY"></div>
+        <div id="angleZ"></div>
+        <div id="scaleX"></div>
+        <div id="scaleY"></div>
+        <div id="scaleZ"></div>
+    </div>
+</div>
+<!-- vertex shader -->
+<script id="3d-vertex-shader" type="x-shader/x-vertex" src="shaders/vertex.glsl"></script>
+
+<!-- fragment shader -->
+<script id="3d-fragment-shader" type="x-shader/x-fragment" src="shaders/fragment.glsl"></script>
+
+<!-- declaring local vars -->
+<script src="lib/globals.js"></script>
+
+<!-- building GL program -->
+<script src="lib/buildProgram.js"></script>
+
+<!-- loading assets-->
+<script src="lib/loadAssets.js"></script>
+
+<!-- doing the real job-->
+<script src="bin/main.js"></script>
