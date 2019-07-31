@@ -1,0 +1,10 @@
+
+canvas {
+    border: .5vw solid black;
+    background-color: antiquewhite;
+    width: 80%;
+    height: 45%;
+}
+video {
+    display: none;
+}
