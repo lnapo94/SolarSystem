@@ -1,31 +1,47 @@
-<canvas id="canvas"></canvas>
-<div id="uiContainer">
-    <div id="ui">
-        <div id="x"></div>
-        <div id="y"></div>
-        <div id="z"></div>
-        <div id="angleX"></div>
-        <div id="angleY"></div>
-        <div id="angleZ"></div>
-        <div id="scaleX"></div>
-        <div id="scaleY"></div>
-        <div id="scaleZ"></div>
-    </div>
-</div>
-<!-- vertex shader -->
-<script id="3d-vertex-shader" type="x-shader/x-vertex" src="shaders/vertex.glsl"></script>
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>WebGL Solar System</title>
 
-<!-- fragment shader -->
-<script id="3d-fragment-shader" type="x-shader/x-fragment" src="shaders/fragment.glsl"></script>
+        <!-- CANVAS DEBUG -->
+        <style type="text/css">
+            body {
+                margin: 0;
+                background-color: gray;
+            }
+            canvas {
+                width: 70vw;
+                height: 70vh;
+                display: block;
+                background-color: white;
+                border:2px solid black;
+            }
+        </style>
 
-<!-- declaring local vars -->
-<script src="lib/globals.js"></script>
+        <!-- SCRIPT IMPORT -->
 
-<!-- building GL program -->
-<script src="lib/buildProgram.js"></script>
+        <!-- External Libraries-->
+        <script src="lib/quaternion.min.js"></script>
+        <script src="lib/webgl-obj-loader.min.js"></script>
 
-<!-- loading assets-->
-<script src="lib/loadAssets.js"></script>
+        <!-- Utility Script -->
+        <script src="lib/utils.js"></script>
+        <script src="lib/m4.js"></script>
 
-<!-- doing the real job-->
-<script src="bin/main.js"></script>
+        <!-- declaring local vars -->
+        <script src="lib/globals.js"></script>
+
+        <!-- Other Classes -->
+        <script src="bin/skybox.js"></script>
+
+        <!-- doing the real job-->
+        <script src="bin/main.js"></script>
+
+    </head>
+
+    <body onload="main()">
+
+    </body>
+</html>
+
