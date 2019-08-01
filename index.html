@@ -1,64 +1,81 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <title>WebGL Solar System</title>
-        <link rel="stylesheet" href="./style.css" type="text/css">
+<head>
+    <meta charset="utf-8">
+    <title>WebGL Demo</title>
+    <link rel="stylesheet" href="./style.css" type="text/css">
+</head>
 
-        <!-- SCRIPT IMPORT -->
+<body>
+    <canvas id="canvas"></canvas>
+    <div id="uiContainer">
+        <div id="ui">
+            <div id="x"></div>
+            <div id="y"></div>
+            <div id="z"></div>
+            <div id="angleX"></div>
+            <div id="angleY"></div>
+            <div id="angleZ"></div>
+            <div id="scaleX"></div>
+            <div id="scaleY"></div>
+            <div id="scaleZ"></div>
+        </div>
+    </div>
+</body>
 
-        <!-- External Libraries-->
-        <script src="lib/gl-matrix.min.js"></script>
-        <script type="text/javascript" src="lib/jQuery.min.js"></script>
-        <script src="lib/quaternion.min.js"></script>
-        <script src="lib/webgl-obj-loader.min.js"></script>
+<script id="3d-vertex-shader" type="x-shader/x-vertex" src="./shaders/vertex.glsl">
 
-        <!-- Utility Script -->
-        <script src="lib/utils.js"></script>
+    attribute vec4 a_position;
+    attribute vec2 a_texcoord;
 
-        <!-- declaring local vars -->
-        <script src="bin/planetList.js"></script>
-        <script src="bin/globals.js"></script>
+    uniform mat4 uModelViewMatrix;
+    uniform mat4 uProjectionMatrix;
 
-        <!-- Other Classes -->
-        <script src="bin/renderLoop.js"></script>
-        <script src="bin/camera.js"></script>
-        <script src="bin/model.js"></script>
-        <script src="bin/shader.js"></script>
-        <script src="bin/transform.js"></script>
-        <script src="bin/skyBox.js"></script>
-        <script src="bin/planetShader.js"></script>
-        <script src="bin/planetModel.js"></script>
+    varying vec2 v_texcoord;
 
+    void main() {
+        // Multiply the position by the matrix.
+        gl_Position = uModelViewMatrix * uProjectionMatrix * a_position;
 
-        <!-- doing the real job-->
-        <script src="bin/main.js"></script>
+        // Pass the texcoord to the fragment shader.
+        v_texcoord = a_texcoord;
+    }
+</script>
 
-    </head>
+<!-- fragment shader -->
+<script id="3d-fragment-shader" type="x-shader/x-fragment" src="./shaders/fragment.glsl">
+    precision mediump float;
 
-    <body onload="loadModels()">
+    // Passed in from the vertex shader.
+    varying vec2 v_texcoord;
 
-        <!-- SKYBOX TEXTURES -->
-        <img alt="" src="./assets/textures/cubemap/bkg1_front.png" id="cubeBack" style="display:none;">
-        <img alt="" src="./assets/textures/cubemap/bkg1_bot.png" id="cubeBottom" style="display:none;">
-        <img alt="" src="./assets/textures/cubemap/bkg1_back.png" id="cubeFront" style="display:none;">
-        <img alt="" src="./assets/textures/cubemap/bkg1_left.png" id="cubeLeft" style="display:none;">
-        <img alt="" src="./assets/textures/cubemap/bkg1_right.png" id="cubeRight" style="display:none;">
-        <img alt="" src="./assets/textures/cubemap/bkg1_top.png" id="cubeTop" style="display:none;">
+    // The texture.
+    uniform sampler2D u_texture;
 
-        <!-- PLANETS TEXTURE -->
-        <img alt="" src="./assets/textures/sun.jpg" id="sun" style="display:none;">
-        <img alt="" src="./assets/textures/mercury.png" id="mercury" style="display:none;">
-        <img alt="" src="./assets/textures/venus.png" id="venus" style="display:none;">
-        <img alt="" src="./assets/textures/earth.png" id="earth" style="display:none;">
-        <img alt="" src="./assets/textures/moon.jpg" id="moon" style="display:none;">
-        <img alt="" src="./assets/textures/mars.png" id="mars" style="display:none;">
-        <img alt="" src="./assets/textures/jupiter.jpg" id="jupiter" style="display:none;">
-        <img alt="" src="./assets/textures/saturn.jpg" id="saturn" style="display:none;">
-        <img alt="" src="./assets/textures/saturn_ring.jpg" id="saturn-ring" style="display:none;">
-        <img alt="" src="./assets/textures/uranus.jpg" id="uranus" style="display:none;">
-        <img alt="" src="./assets/textures/uranus_ring.jpg" id="uranus-ring" style="display:none;">
-        <img alt="" src="./assets/textures/neptune.jpg" id="neptune" style="display:none;">
+    void main() {
+        gl_FragColor = texture2D(u_texture, v_texcoord);
+    }
 
-    </body>
+</script>
+
+<script type="text/javascript" src="lib/jQuery.min.js"></script>
+<script src="./lib/webgl-obj-loader.min.js"></script>
+<script src="lib/gl-matrix.min.js"></script>
+<!-- declaring local vars -->
+<script src="lib/globals.js"></script>
+
+<script src="lib/loadShaders.js"></script>
+<!-- building GL program -->
+<script src="lib/buildProgram.js"></script>
+
+<!-- loading assets-->
+<script src="lib/loadAssets.js"></script>
+
+<!-- doing the real job-->
+<script type="module" src="bin/main.js"></script>
+
 </html>
+
+
+
+<!-- vertex shader -->
