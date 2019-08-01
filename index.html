@@ -23,16 +23,48 @@
     </div>
 </body>
 
-<script id="3d-vertex-shader" type="x-shader/x-vertex" src="shaders/vertex.glsl"></script>
+<script id="3d-vertex-shader" type="x-shader/x-vertex" src="./shaders/vertex.glsl">
+
+    attribute vec4 a_position;
+    attribute vec2 a_texcoord;
+
+    uniform mat4 uModelViewMatrix;
+    uniform mat4 uProjectionMatrix;
+
+    varying vec2 v_texcoord;
+
+    void main() {
+        // Multiply the position by the matrix.
+        gl_Position = uModelViewMatrix * uProjectionMatrix * a_position;
+
+        // Pass the texcoord to the fragment shader.
+        v_texcoord = a_texcoord;
+    }
+</script>
 
 <!-- fragment shader -->
-<script id="3d-fragment-shader" type="x-shader/x-fragment" src="shaders/fragment.glsl"></script>
+<script id="3d-fragment-shader" type="x-shader/x-fragment" src="./shaders/fragment.glsl">
+    precision mediump float;
 
+    // Passed in from the vertex shader.
+    varying vec2 v_texcoord;
+
+    // The texture.
+    uniform sampler2D u_texture;
+
+    void main() {
+        gl_FragColor = texture2D(u_texture, v_texcoord);
+    }
+
+</script>
+
+<script type="text/javascript" src="lib/jQuery.min.js"></script>
 <script src="./lib/webgl-obj-loader.min.js"></script>
-
+<script src="lib/gl-matrix.min.js"></script>
 <!-- declaring local vars -->
 <script src="lib/globals.js"></script>
 
+<script src="lib/loadShaders.js"></script>
 <!-- building GL program -->
 <script src="lib/buildProgram.js"></script>
 
@@ -40,7 +72,7 @@
 <script src="lib/loadAssets.js"></script>
 
 <!-- doing the real job-->
-<script src="bin/main.js"></script>
+<script type="module" src="bin/main.js"></script>
 
 </html>
 

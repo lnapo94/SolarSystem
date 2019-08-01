@@ -1,15 +1,15 @@
 export class Object {
-    constructor(vArray, vtArray, vnArray, idxArray, textureSrc) {
+    constructor(mesh, textureSrc) {
 
-        this.vArray = vArray;
-        this.vtArray = vtArray;
-        this.vnArray = vnArray;
-        this.idxArray = idxArray;
+        this.vArray = mesh.vertices;
+        this.vtArray = mesh.textures;
+        this.vnArray = mesh.vertexNormals;
+        this.idxArray = mesh.indices;
         this.textureSrc = textureSrc;
 
     }
 
-    _bindTexture(){
+    _bindTexture(texture){
         var image = new Image();
         image.src = this.textureSrc;
         image.addEventListener('load', function() {
@@ -28,7 +28,7 @@ export class Object {
         G_gl.texImage2D(G_gl.TEXTURE_2D, 0, G_gl.RGBA, 1, 1, 0, G_gl.RGBA, G_gl.UNSIGNED_BYTE,
             new Uint8Array([0, 0, 255, 255]));
         // bind the real texture
-        this._bindTexture()
+        this._bindTexture(texture)
     }
 
     _setGeometry(){
@@ -45,8 +45,9 @@ export class Object {
     }
     lookup(){
         this.positionLocation = G_gl.getAttribLocation(G_program, "a_position");
-        this.textureLocation =  G_gl.getAttribLocation(G_program, "a_texcoords");
-
+        this.textureLocation =  G_gl.getAttribLocation(G_program, "a_texcoord");
+        this.modelViewMatrix = G_gl.getUniformLocation(G_program, 'uModelViewMatrix');
+        this.projectionMatrix = G_gl.getUniformLocation(G_program, 'uProjectionMatrix');
         this.positionBuffer = G_gl.createBuffer();
         // Bind it to ARRAY_BUFFER (think of it as ARRAY_BUFFER = positionBuffer)
         G_gl.bindBuffer(G_gl.ARRAY_BUFFER, this.positionBuffer);
@@ -60,34 +61,40 @@ export class Object {
 
         this.elementBuffer = G_gl.createBuffer();
         G_gl.bindBuffer(G_gl.ELEMENT_ARRAY_BUFFER, this.elementBuffer);
-
+        this._setElements();
 
         this._prepareTexture();
     }
 
 
-    render(){
+    render(projectionMatrix, modelViewMatrix){
         // read vertexes.
+        G_gl.enableVertexAttribArray(this.positionLocation)
         G_gl.bindBuffer(G_gl.ARRAY_BUFFER, this.positionBuffer);
-        G_gl.enableVertexAttribArray(this.positionLocation);
         G_gl.vertexAttribPointer(
             this.positionLocation, 3, G_gl.FLOAT, false, 0, 0);
 
         // read texture
-        G_gl.bindBuffer(G_gl.ARRAY_BUFFER, this.textcoordBuffer);
         G_gl.enableVertexAttribArray(this.textureLocation);
+        G_gl.bindBuffer(G_gl.ARRAY_BUFFER, this.textcoordBuffer);
         G_gl.vertexAttribPointer(
-            this.textureLocation, 2, G_gl.FLOAT, false, 0, 0);
+           this.textureLocation, 2, G_gl.FLOAT, false, 0, 0);
+
 
         //bind elements
         G_gl.bindBuffer(G_gl.ELEMENT_ARRAY_BUFFER, this.elementBuffer);
-
-
         //draw object
-        const vertexCount = this.vArray.length;
-        const type = G_gl.UNSIGNED_SHORT;
-        const offset = 0;
-        G_gl.drawElements(G_gl.TRIANGLES, vertexCount, type, offset);
+
+        G_gl.uniformMatrix4fv(
+            this.projectionMatrix,
+            false,
+            projectionMatrix);
+        G_gl.uniformMatrix4fv(
+            this.modelViewMatrix,
+            false,
+            modelViewMatrix);
+        
+        G_gl.drawElements(G_gl.TRIANGLES, this.idxArray.length/3, G_gl.UNSIGNED_SHORT, 0);
 
     }
 }
