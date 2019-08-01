@@ -3,21 +3,7 @@
     <head>
         <meta charset="UTF-8">
         <title>WebGL Solar System</title>
-
-        <!-- CANVAS DEBUG -->
-        <style type="text/css">
-            body {
-                margin: 0;
-                background-color: gray;
-            }
-            canvas {
-                width: 70vw;
-                height: 70vh;
-                display: block;
-                background-color: white;
-                border:2px solid black;
-            }
-        </style>
+        <link rel="stylesheet" href="./style.css" type="text/css">
 
         <!-- SCRIPT IMPORT -->
 
@@ -42,6 +28,19 @@
 
     <body onload="main()">
 
+        <div id="uiContainer">
+            <div id="ui">
+                <div id="x"></div>
+                <div id="y"></div>
+                <div id="z"></div>
+                <div id="angleX"></div>
+                <div id="angleY"></div>
+                <div id="angleZ"></div>
+                <div id="scaleX"></div>
+                <div id="scaleY"></div>
+                <div id="scaleZ"></div>
+            </div>
+        </div>
+
     </body>
 </html>
-

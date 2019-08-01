@@ -1,0 +1,16 @@
+canvas {
+    border: .5vw solid black;
+    background-color: antiquewhite;
+    width: 70vw;
+    height: 70vh;
+    display: block;
+}
+
+body {
+    margin: 0;
+    background-color: gray;
+}
+
+video {
+    display: none;
+}
