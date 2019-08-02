@@ -1,4 +1,5 @@
 import {Object} from "../data/planets.js";
+
 let then = 0;
 
 function drawScene(then, deltatime) {
@@ -11,20 +12,9 @@ function drawScene(then, deltatime) {
     G_gl.enable(G_gl.CULL_FACE);
     G_gl.clear(G_gl.COLOR_BUFFER_BIT | G_gl.DEPTH_BUFFER_BIT);      // Clear the canvas before we start drawing on it.
 
-    // Compute perspective matrix
-    const fieldOfView = 30 * Math.PI / 180;   // in radians
-    const aspect = G_gl.canvas.clientWidth / G_gl.canvas.clientHeight;
-    const zNear = 0.1;
-    const zFar = 1000.0;
-    const projectionMatrix = mat4.create();
-    mat4.perspective(projectionMatrix,
-        fieldOfView,
-        aspect,
-        zNear,
-        zFar);
     let o;
     for (o in G_Objects){
-        G_Objects[o].render(projectionMatrix);
+        G_Objects[o].render(G_camera.projectionMatrix, G_camera.viewMatrix);
     }
 }
 
@@ -34,6 +24,7 @@ function render(now) {
     then = now;
 
     drawScene(then, deltaTime);
+    G_camera.updateViewMatrix();
 
     requestAnimationFrame(render);
 }
@@ -59,6 +50,10 @@ function  main(data) {
         let res = loadMeshData(o.mesh);
         G_Objects[o.name] = new Object(res, o.texture)
     }
+
+    G_camera = new Camera(G_gl, 30, 0.1, 1000.0);
+    new CameraController(G_gl, G_camera);
+
     setModelViewMatrixes();
     for (o in G_Objects) {
         G_Objects[o].lookup();

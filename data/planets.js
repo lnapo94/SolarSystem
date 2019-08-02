@@ -45,7 +45,7 @@ export class Object {
         // bind the real texture
         this.textureImage = new Image();
         this.textureImage.src = this.textureSrc;
-        this.textureImage.addEventListener('load', this._bindTexture());
+        this.textureImage.addEventListener('load', this._bindTexture);
     }
 
     _setGeometry(){
@@ -69,6 +69,7 @@ export class Object {
         this.textureLocation =  G_gl.getAttribLocation(G_program, "a_texcoord");
         this.modelViewMatrixLocation = G_gl.getUniformLocation(G_program, 'uModelViewMatrix');
         this.projectionMatrixLocation = G_gl.getUniformLocation(G_program, 'uProjectionMatrix');
+        this.cameraMatrixLocation = G_gl.getUniformLocation(G_program, 'uCameraMatrix');
         this.samplerLocation = G_gl.getUniformLocation(G_program, "u_texture");
         // TODO END OF STUFF NEEDED TO BE MOVED
 
@@ -81,7 +82,7 @@ export class Object {
     }
 
 
-    render(projectionMatrix){
+    render(projectionMatrix, cameraMatrix){
         G_gl.useProgram(G_program);
 
         // read vertexes.
@@ -110,8 +111,13 @@ export class Object {
             false,
             projectionMatrix);
 
-        console.log('sending uniform');
-        console.log(this.modelViewMatrix);
+        G_gl.uniformMatrix4fv(
+            this.cameraMatrixLocation,
+            false,
+            cameraMatrix);
+
+        // console.log('sending uniform');
+        // console.log(this.modelViewMatrix);
         G_gl.uniformMatrix4fv(
             this.modelViewMatrixLocation,
             false,
