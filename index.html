@@ -30,12 +30,13 @@
 
     uniform mat4 uModelViewMatrix;
     uniform mat4 uProjectionMatrix;
+    uniform mat4 uCameraMatrix;
 
     varying vec2 v_texcoord;
 
     void main() {
         // Multiply the position by the matrix.
-        gl_Position = uProjectionMatrix * uModelViewMatrix * a_position;
+        gl_Position = uProjectionMatrix * uCameraMatrix * uModelViewMatrix * a_position;
 
         // Pass the texcoord to the fragment shader.
         v_texcoord = a_texcoord;
@@ -72,6 +73,8 @@
 <script src="lib/loadAssets.js"></script>
 
 <!-- doing the real job-->
+<script src="data/transform.js"></script>
+<script src="data/camera.js"></script>
 <script type="module" src="bin/main.js"></script>
 
 </html>
