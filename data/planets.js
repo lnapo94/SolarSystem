@@ -18,21 +18,18 @@ export class Object {
         return this.modelViewMatrix.copy()
     }
 
-    _bindTexture(texture){
-        var image = new Image();
-        image.src = this.textureSrc;
-        image.addEventListener('load', function() {
+    _bindTexture(){
             // Now that the image has loaded make copy it to the texture.
-            G_gl.bindTexture(G_gl.TEXTURE_2D, texture);
+            G_gl.activeTexture(G_gl.TEXTURE0);
+            G_gl.bindTexture(G_gl.TEXTURE_2D, this.texture);
             G_gl.texParameteri(G_gl.TEXTURE_2D, G_gl.TEXTURE_MAG_FILTER, G_gl.LINEAR);
             G_gl.texParameteri(G_gl.TEXTURE_2D, G_gl.TEXTURE_MIN_FILTER, G_gl.LINEAR);
             G_gl.texParameteri(G_gl.TEXTURE_2D, G_gl.TEXTURE_WRAP_S, G_gl.CLAMP_TO_EDGE);
             G_gl.texParameteri(G_gl.TEXTURE_2D, G_gl.TEXTURE_WRAP_T, G_gl.CLAMP_TO_EDGE);
-            G_gl.texImage2D(G_gl.TEXTURE_2D, 0, G_gl.RGBA, G_gl.RGBA,G_gl.UNSIGNED_BYTE, image);
+            G_gl.texImage2D(G_gl.TEXTURE_2D, 0, G_gl.RGBA, G_gl.RGBA,G_gl.UNSIGNED_BYTE, this.textureImage);
             //G_gl.generateMipmap(G_gl.TEXTURE_2D);
             console.log("texture loaded")
-        });
-    }
+        }
 
     _prepareTexture(){
 
@@ -40,13 +37,15 @@ export class Object {
         this._setTextureCoords();
 
         // Create a texture.
-        var texture = G_gl.createTexture();
-        G_gl.bindTexture(G_gl.TEXTURE_2D, texture);
+        G_gl.bindTexture(G_gl.TEXTURE_2D, this.texture);
         // Fill the texture with a 1x1 blue pixel.
         G_gl.texImage2D(G_gl.TEXTURE_2D, 0, G_gl.RGBA, 1, 1, 0, G_gl.RGBA, G_gl.UNSIGNED_BYTE,
             new Uint8Array([0, 0, 255, 255]));
+
         // bind the real texture
-        this._bindTexture(texture)
+        this.textureImage = new Image();
+        this.textureImage.src = this.textureSrc;
+        this.textureImage.addEventListener('load', this._bindTexture());
     }
 
     _setGeometry(){
@@ -70,17 +69,21 @@ export class Object {
         this.textureLocation =  G_gl.getAttribLocation(G_program, "a_texcoord");
         this.modelViewMatrixLocation = G_gl.getUniformLocation(G_program, 'uModelViewMatrix');
         this.projectionMatrixLocation = G_gl.getUniformLocation(G_program, 'uProjectionMatrix');
+        this.samplerLocation = G_gl.getUniformLocation(G_program, "u_texture");
         // TODO END OF STUFF NEEDED TO BE MOVED
 
         this.positionBuffer = G_gl.createBuffer();
         this.textcoordBuffer = G_gl.createBuffer();
         this.elementBuffer = G_gl.createBuffer();
+        this.texture = G_gl.createTexture();
 
         this._prepareTexture();
     }
 
 
     render(projectionMatrix){
+        G_gl.useProgram(G_program);
+
         // read vertexes.
         this._setGeometry();
         this._setTextureCoords();
@@ -107,10 +110,17 @@ export class Object {
             false,
             projectionMatrix);
 
+        console.log('sending uniform');
+        console.log(this.modelViewMatrix);
         G_gl.uniformMatrix4fv(
             this.modelViewMatrixLocation,
             false,
             this.modelViewMatrix);
+
+
+        G_gl.activeTexture(G_gl.TEXTURE0);
+        G_gl.bindTexture(G_gl.TEXTURE_2D, this.texture);
+        G_gl.uniform1i(this.samplerLocation, 0);
 
         G_gl.drawElements(G_gl.TRIANGLES, this.idxArray.length, G_gl.UNSIGNED_SHORT, 0);
 
