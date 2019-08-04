@@ -4,9 +4,8 @@ precision mediump float;
 
 in vec2 uvFS;
 out vec4 outColor;
-uniform sampler2D uSunTexture;
+uniform sampler2D uMainTexture;
 
 void main() {
-
-    outColor = texture(uSunTexture, uvFS);
+    outColor = texture(uMainTexture, uvFS);
 }

@@ -1,7 +1,8 @@
 // here to put variables that need to be shared among different files
 
-// URLs
-
+/**
+ *  LIST OF USEFUL URLs
+ */
 let baseURL = '.';
 
 let sunShader = baseURL + '/assets/shaders/sun';
@@ -11,6 +12,8 @@ let fs_sunURL = sunShader + '/fs.glsl';
 let skyShader = baseURL + '/assets/shaders/skymap';
 let vs_skyURL = skyShader + '/vs.glsl';
 let fs_skyURL = skyShader + '/fs.glsl';
+// END OF URLs
 
-let canvas = null;
-let gl = null;
+// GLOBAL VARIABLES
+let G_canvas = null;
+let G_gl = null;
