@@ -22,9 +22,9 @@ function main(mesh) {
     utils.resizeCanvasToDisplaySize(gl.canvas);
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 
-    let camera = new Camera(gl);
-    camera.transform.position = vec3.fromValues(5, 5, 20);
-    camera.transform.rotation = vec3.fromValues(-10, 10, 0);
+    let camera = new Camera(gl, 45);
+    camera.transform.position = vec3.fromValues(0, 100, 10);
+    camera.transform.rotation = vec3.fromValues(-90, 0, 0);
 
     let cameraController = new CameraController(gl, camera);
 
@@ -37,7 +37,7 @@ function main(mesh) {
     let sunUV = mesh.meshes[0].texturecoords[0];
     sunMesh.createMeshVAO(sunVertices, sunIndices, null, sunUV);
     let sunModel = new Model(sunMesh);
-    sunModel.setScale(0.0002, 0.0002, 0.0002);
+    sunModel.setScale(0.0005, 0.0005, 0.0005);
 
     let sunShader = new SunShader(gl);
     sunShader.enable().setPerspective(camera.projectionMatrix).disable();
@@ -45,7 +45,7 @@ function main(mesh) {
     // Load Earth
     let earthTexture = Texture.loadTexture(gl, document.getElementById('earth'), true);
     let earthModel = new Model(sunMesh);
-    earthModel.setPosition(10, 0, -30);
+    earthModel.setPosition(30, 0, -50);
     earthModel.setRotation(5, 50, 0);
     earthModel.setScale(0.0002, 0.0002, 0.0002);
 
@@ -63,7 +63,14 @@ function main(mesh) {
 
     new RenderLoop(onRender).start();
 
+    let prova = 0;
+
     function onRender(deltaTime) {
+
+        earthModel.addRotation(0, deltaTime * 30, 0);
+        earthModel.setPosition(30 * Math.cos(prova), 0, -50 * Math.sin(prova));
+        sunModel.addRotation(0, deltaTime * 10, 0);
+        prova += 0.01;
         camera.updateViewMatrix();
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
@@ -82,6 +89,7 @@ function main(mesh) {
             .disable();
 
         // Load the earth texture with sun shader
+
         sunShader
             .enable()
             .setTexture(earthTexture)
