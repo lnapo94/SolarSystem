@@ -58,14 +58,14 @@ function main(mesh) {
         camera.updateProjectionMatrix();
         G_gl.clear(G_gl.COLOR_BUFFER_BIT | G_gl.DEPTH_BUFFER_BIT);
 
-        skyModel.setShaderPerspective(camera.projectionMatrix).render(camera.getFixedViewMatrix());
+        skyModel.setShaderPerspective(camera.getProjectionMatrix()).render(camera.getFixedViewMatrix());
 
-        sunModel.setShaderPerspective(camera.projectionMatrix).render(camera.getViewMatrix());
+        sunModel.setShaderPerspective(camera.getProjectionMatrix()).render(camera.getViewMatrix());
 
         sunModel.transform.addRotation(0, deltaTime * 10, 0);
         earthModel.transform.addRotation(0, deltaTime * 50, 0);
 
-        earthModel.setShaderPerspective(camera.projectionMatrix).render(camera.getViewMatrix());
+        earthModel.setShaderPerspective(camera.getProjectionMatrix()).render(camera.getViewMatrix());
     }
 }
 
@@ -77,7 +77,7 @@ function loadSun(vertices, indices, normals, uvs, camera) {
     let sunModel = new Model(G_gl);
     sunModel
         .loadShader(vs_sunURL, fs_sunURL)
-        .setShaderPerspective(camera.projectionMatrix)
+        .setShaderPerspective(camera.getProjectionMatrix())
         .loadTexture(sunTexture, true)
         .setupBuffers(vertices, indices, normals, uvs);
 
@@ -95,7 +95,7 @@ function loadEarth(vertices, indices, normals, uvs, camera) {
     let earthModel = new Model(G_gl);
     earthModel
         .loadShader(vs_sunURL, fs_sunURL)
-        .setShaderPerspective(camera.projectionMatrix)
+        .setShaderPerspective(camera.getProjectionMatrix())
         .loadTexture(earthTexture, true)
         .setupBuffers(vertices, indices, normals, uvs);
 
@@ -121,7 +121,7 @@ function loadSkyBox(camera) {
     let skyModel = new NewSkyBox(G_gl);
     skyModel
         .loadShader(vs_skyURL, fs_skyURL)
-        .setShaderPerspective(camera.projectionMatrix)
+        .setShaderPerspective(camera.getProjectionMatrix())
         .loadTexture(skyTextureArray)
         .setupBuffers();
 
