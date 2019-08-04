@@ -53,17 +53,19 @@ function main(mesh) {
 
     // Function which actually does the rendering
     function onRender(deltaTime) {
+        cameraController.setDeltaTime(deltaTime);
         camera.updateViewMatrix();
+        camera.updateProjectionMatrix();
         G_gl.clear(G_gl.COLOR_BUFFER_BIT | G_gl.DEPTH_BUFFER_BIT);
 
-        skyModel.render(camera.getFixedViewMatrix());
+        skyModel.setShaderPerspective(camera.projectionMatrix).render(camera.getFixedViewMatrix());
 
-        sunModel.render(camera.getViewMatrix());
+        sunModel.setShaderPerspective(camera.projectionMatrix).render(camera.getViewMatrix());
 
         sunModel.transform.addRotation(0, deltaTime * 10, 0);
         earthModel.transform.addRotation(0, deltaTime * 50, 0);
 
-        earthModel.render(camera.getViewMatrix());
+        earthModel.setShaderPerspective(camera.projectionMatrix).render(camera.getViewMatrix());
     }
 }
 
