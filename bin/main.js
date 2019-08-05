@@ -44,6 +44,9 @@ function setModelViewMatrixes() {
     G_Objects['terra'].setModelViewMatrix(terraMVM);
 }
 
+// ====================================================================
+
+
 function  main(data) {
     let o;
     for (o of data){
@@ -60,6 +63,8 @@ function  main(data) {
     }
     requestAnimationFrame(render);
 }
+
+// ====================================================================
 
 let requestMeshes = {
     sun : function () {
