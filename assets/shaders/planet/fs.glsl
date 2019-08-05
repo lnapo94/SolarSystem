@@ -18,7 +18,7 @@ void main() {
     vec4 baseColor = texture(uMainTexture, fs_uv);
     vec3 lightColor = vec3(1.0, 1.0, 1.0);
 
-    vec3 pointLightColor = lightColor * pow(100.0 / length(uLightPosition - fs_pos), 2.0);
+    vec3 pointLightColor = lightColor * pow(250.0 / length(uLightPosition - fs_pos), 2.0);
 
     // Ambient Light
     float ambientPower = 0.15;

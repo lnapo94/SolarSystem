@@ -39,8 +39,8 @@ function main(mesh) {
 
     // Create the Camera
     let camera = new Camera(G_gl, 45);
-    camera.transform.position = vec3.fromValues(0, 0, 100);
-    camera.transform.rotation = vec3.fromValues(0, 0, 0);
+    camera.transform.position = vec3.fromValues(0, 200, 200);
+    camera.transform.setRotation(40, 0, 0);
     let cameraController = new CameraController(G_gl, camera);
 
     // Load Sun Mesh
@@ -63,6 +63,8 @@ function main(mesh) {
     // Start the render loop
     new RenderLoop(onRender).start();
 
+    let actualPosition = 0;
+
     // Function which actually does the rendering
     function onRender(deltaTime) {
         cameraController.setDeltaTime(deltaTime);
@@ -81,7 +83,9 @@ function main(mesh) {
             .setShaderLightPosition(vec3.fromValues(0, 0, 0))
             .setShaderCameraPosition(camera.transform.position)
             .render(camera.getViewMatrix(), true);
-        earthModel.transform.addRotation(0, deltaTime * 50, 0);
+        earthModel.transform.addRotation(0, deltaTime * 100, 0);
+        earthModel.transform.setPosition(180 * Math.cos(actualPosition), 0, -100 * Math.sin(actualPosition));
+        actualPosition += deltaTime * 0.5;
     }
 }
 
@@ -97,7 +101,7 @@ function loadSun(vertices, indices, normals, uvs) {
         .setupBuffers(vertices, indices, normals, uvs);
 
     // Setup the transform of the Sun
-    sunModel.transform.setScale(0.0005, 0.0005, 0.0005);
+    sunModel.transform.setScale(0.002, 0.002, 0.002);
 
     return sunModel;
 }
@@ -116,7 +120,6 @@ function loadEarth(vertices, indices, normals, uvs) {
 
     // Setup the transform of the Earth
     earthModel.transform.setScale(200, 200, 200);
-    earthModel.transform.setPosition(50, 0, -50);
     earthModel.transform.setRotation(0, 0, -20);
 
     return earthModel;

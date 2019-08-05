@@ -1,8 +1,8 @@
 canvas {
     border: .5vw solid black;
     background-color: antiquewhite;
-    width: 70vw;
-    height: 70vh;
+    width: 90%;
+    height: 90%;
     display: block;
 }
 
