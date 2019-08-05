@@ -18,15 +18,16 @@ export class Object {
         return this.modelViewMatrix.copy()
     }
 
-    _bindTexture(){
+    _bindTexture(self){
+
             // Now that the image has loaded make copy it to the texture.
             G_gl.activeTexture(G_gl.TEXTURE0);
-            G_gl.bindTexture(G_gl.TEXTURE_2D, this.texture);
+            G_gl.bindTexture(G_gl.TEXTURE_2D, self.texture);
             G_gl.texParameteri(G_gl.TEXTURE_2D, G_gl.TEXTURE_MAG_FILTER, G_gl.LINEAR);
             G_gl.texParameteri(G_gl.TEXTURE_2D, G_gl.TEXTURE_MIN_FILTER, G_gl.LINEAR);
             G_gl.texParameteri(G_gl.TEXTURE_2D, G_gl.TEXTURE_WRAP_S, G_gl.CLAMP_TO_EDGE);
             G_gl.texParameteri(G_gl.TEXTURE_2D, G_gl.TEXTURE_WRAP_T, G_gl.CLAMP_TO_EDGE);
-            G_gl.texImage2D(G_gl.TEXTURE_2D, 0, G_gl.RGBA, G_gl.RGBA,G_gl.UNSIGNED_BYTE, this.textureImage);
+            G_gl.texImage2D(G_gl.TEXTURE_2D, 0, G_gl.RGBA, G_gl.RGBA,G_gl.UNSIGNED_BYTE, self.textureImage);
             //G_gl.generateMipmap(G_gl.TEXTURE_2D);
             console.log("texture loaded")
         }
@@ -45,7 +46,7 @@ export class Object {
         // bind the real texture
         this.textureImage = new Image();
         this.textureImage.src = this.textureSrc;
-        this.textureImage.addEventListener('load', this._bindTexture);
+        this.textureImage.addEventListener('load', this._bindTexture(this));
     }
 
     _setGeometry(){
