@@ -1,6 +1,11 @@
 function loadModels() {
-    utils.get_json('./assets/models/sun.json', function (mesh) {
-        main(mesh)
+    let meshArray = [];
+    utils.get_json('./assets/models/sun.json', function (sunMesh) {
+        meshArray.push(sunMesh);
+        utils.get_json('./assets/models/earth.json', function (earthMesh) {
+            meshArray.push(earthMesh);
+            main(meshArray);
+        })
     })
 }
 
@@ -38,15 +43,22 @@ function main(mesh) {
     camera.transform.rotation = vec3.fromValues(0, 0, 0);
     let cameraController = new CameraController(G_gl, camera);
 
-    // Load Sphere Mesh
-    let vertices = mesh.meshes[0].vertices;
-    let indices = [].concat.apply([], mesh.meshes[0].faces);
-    let UVs = mesh.meshes[0].texturecoords[0];
+    // Load Sun Mesh
+    let sunVertices = mesh[0].meshes[0].vertices;
+    let sunIndices = [].concat.apply([], mesh[0].meshes[0].faces);
+    let sunUVs = mesh[0].meshes[0].texturecoords[0];
+    let sunNormals = mesh[0].meshes[0].normals;
+
+    // Load Earth Mesh
+    let earthVertices = mesh[1].meshes[0].vertices;
+    let earthIndices = [].concat.apply([], mesh[1].meshes[0].faces);
+    let earthUVs = mesh[1].meshes[0].texturecoords[0];
+    let earthNormals = mesh[1].meshes[0].normals;
 
     // Load Models
     let skyModel = loadSkyBox(camera);
-    let sunModel = loadSun(vertices, indices, null, UVs, camera);
-    let earthModel = loadEarth(vertices, indices, null, UVs, camera);
+    let sunModel = loadSun(sunVertices, sunIndices, sunNormals, sunUVs);
+    let earthModel = loadEarth(earthVertices, earthIndices, earthNormals, earthUVs);
 
     // Start the render loop
     new RenderLoop(onRender).start();
@@ -61,15 +73,19 @@ function main(mesh) {
         skyModel.setShaderPerspective(camera.getProjectionMatrix()).render(camera.getFixedViewMatrix());
 
         sunModel.setShaderPerspective(camera.getProjectionMatrix()).render(camera.getViewMatrix());
-
         sunModel.transform.addRotation(0, deltaTime * 10, 0);
-        earthModel.transform.addRotation(0, deltaTime * 50, 0);
 
-        earthModel.setShaderPerspective(camera.getProjectionMatrix()).render(camera.getViewMatrix());
+        earthModel
+            .setShaderPerspective(camera.getProjectionMatrix())
+            .setShaderNormalMatrix(earthModel.transform.getNormalMatrix())
+            .setShaderLightPosition(vec3.fromValues(0, 0, 0))
+            .setShaderCameraPosition(camera.transform.position)
+            .render(camera.getViewMatrix(), true);
+        earthModel.transform.addRotation(0, deltaTime * 50, 0);
     }
 }
 
-function loadSun(vertices, indices, normals, uvs, camera) {
+function loadSun(vertices, indices, normals, uvs) {
     // Load texture
     let sunTexture = document.getElementById('sun');
 
@@ -77,7 +93,6 @@ function loadSun(vertices, indices, normals, uvs, camera) {
     let sunModel = new Model(G_gl);
     sunModel
         .loadShader(vs_sunURL, fs_sunURL)
-        .setShaderPerspective(camera.getProjectionMatrix())
         .loadTexture(sunTexture, true)
         .setupBuffers(vertices, indices, normals, uvs);
 
@@ -87,21 +102,22 @@ function loadSun(vertices, indices, normals, uvs, camera) {
     return sunModel;
 }
 
-function loadEarth(vertices, indices, normals, uvs, camera) {
+function loadEarth(vertices, indices, normals, uvs) {
     // Load Texture
     let earthTexture = document.getElementById('earth');
 
     // Create Model
-    let earthModel = new Model(G_gl);
+    let earthModel = new PlanetModel(G_gl);
+    earthModel.noCulling = true;
     earthModel
-        .loadShader(vs_sunURL, fs_sunURL)
-        .setShaderPerspective(camera.getProjectionMatrix())
+        .loadShader(vs_planetURL, fs_planetURL, true)
         .loadTexture(earthTexture, true)
         .setupBuffers(vertices, indices, normals, uvs);
 
     // Setup the transform of the Earth
-    earthModel.transform.setScale(0.0005, 0.0005, 0.0005);
-    earthModel.transform.setPosition(30, 0, -50);
+    earthModel.transform.setScale(200, 200, 200);
+    earthModel.transform.setPosition(50, 0, -50);
+    earthModel.transform.setRotation(0, 0, -20);
 
     return earthModel;
 }

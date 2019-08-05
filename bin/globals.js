@@ -12,6 +12,10 @@ let fs_sunURL = sunShader + '/fs.glsl';
 let skyShader = baseURL + '/assets/shaders/skymap';
 let vs_skyURL = skyShader + '/vs.glsl';
 let fs_skyURL = skyShader + '/fs.glsl';
+
+let planetShader = baseURL + '/assets/shaders/planet';
+let vs_planetURL = planetShader + '/vs.glsl';
+let fs_planetURL = planetShader + '/fs.glsl';
 // END OF URLs
 
 // GLOBAL VARIABLES
