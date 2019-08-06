@@ -41,9 +41,9 @@ function main(mesh) {
     initWebGL();
 
     // Create the Camera
-    let camera = new Camera(G_gl, 45);
-    camera.transform.position = vec3.fromValues(0, 200, 200);
-    camera.transform.setRotation(40, 0, 0);
+    let camera = new Camera(G_gl, 45, 0.1, 2000.0);
+    camera.transform.setPosition(300, 0, 450);
+    camera.transform.setRotation(0, 0, 0);
     let cameraController = new CameraController(G_gl, camera);
 
     // Load Models
@@ -81,7 +81,7 @@ function main(mesh) {
                     .setShaderNormalMatrix(planets[i].transform.getNormalMatrix())
                     .setShaderLightParameters(vec3.fromValues(0, 0, 0), planetList[i].lightTargetDistance, planetList[i].lightDecay, planetList[i].lightAmbientPower, planetList[i].lightDiffusePower)
                     .setShaderCameraPosition(camera.transform.position)
-                    .render(nonFixedView, true);
+                    .render(nonFixedView);
             } else {
                 planets[i]
                     .setShaderPerspective(projection)
@@ -190,7 +190,7 @@ function loadSkyBox() {
     ];
 
     // Create Model
-    let skyModel = new SkyBox(G_gl);
+    let skyModel = new SkyBox(G_gl, 2000, 2000, 2000);
     skyModel
         .loadShader(vs_skyURL, fs_skyURL)
         .loadTexture(skyTextureArray)

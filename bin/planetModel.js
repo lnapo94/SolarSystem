@@ -14,6 +14,7 @@ class PlanetModel extends Model{
 
         this.transform.setScale(modelData.scale.X, modelData.scale.Y, modelData.scale.Z);
         this.transform.setPosition(modelData.position.X, modelData.position.Y, modelData.position.Z);
+        this.transform.setRotation(modelData.rotation.X, modelData.rotation.Y, modelData.rotation.Z);
 
         return this;
     }
