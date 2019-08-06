@@ -149,6 +149,42 @@ let planetList = [
         children : [ ]
     },
     {
+        name : "MOON",
+        mesh : "./assets/models/moon.json",
+        meshIndex: 0,
+        vShaderURL : "./assets/shaders/planet/vs.glsl",
+        fShaderURL : "./assets/shaders/planet/fs.glsl",
+        texture : "moon",
+        doYFlip: true,
+        noCulling: false,
+        doBlending: false,
+        position : {
+            X : 200,
+            Y : -100,
+            Z : 0
+        },
+        rotation: {
+            X : 0,
+            Y : 0,
+            Z : 0
+        },
+        scale : {
+            X : 0.3,
+            Y : 0.3,
+            Z : 0.3
+        },
+        lightTargetDistance: 300.0,
+        lightDecay: 2.0,
+        lightAmbientPower: 0.5, //0.15
+        lightDiffusePower: 0.25,
+        motion : function (deltaTime, model) {
+            // model.transform.addRotation(0, deltaTime * 100, 0);
+            // model.transform.setPosition(180 * Math.cos(animationParams.earthPosition) + 70, 0, -150 * Math.sin(animationParams.earthPosition));
+            // animationParams.earthPosition += deltaTime * 0.5;
+        },
+        children : [ ]
+    },
+    {
         name : "MARS",
         mesh : "./assets/models/mars.json",
         meshIndex: 0,
