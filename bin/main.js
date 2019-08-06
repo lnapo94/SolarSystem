@@ -1,132 +1,129 @@
-import {Object} from "../data/planets.js";
 
-let then = 0;
 
-function drawScene(then, deltatime) {
-    // TODO THIS IS AN ANTIPATTERN, BETTER TO CHANGE IT
-    G_gl.viewport(0, 0, G_gl.canvas.width, G_gl.canvas.height);
-    G_gl.clearColor(0.0, 0.0, 0.0, 1.0);  // Clear to black, fully opaque
-    G_gl.clearDepth(1.0);                 // Clear everything
-    G_gl.enable(G_gl.DEPTH_TEST);           // Enable depth testing
-    G_gl.depthFunc(G_gl.LEQUAL);            // Near things obscure far things
+function initWebGL() {
+    // Create the G_canvas and attach it to the body
+    G_canvas = utils.createCanvas();
+    G_gl = canvas.getContext('webgl2');
+    G_gl.cullFace(G_gl.BACK);
+    G_gl.frontFace(G_gl.CCW);
+    G_gl.enable(G_gl.DEPTH_TEST);
     G_gl.enable(G_gl.CULL_FACE);
-    G_gl.clear(G_gl.COLOR_BUFFER_BIT | G_gl.DEPTH_BUFFER_BIT);      // Clear the canvas before we start drawing on it.
+    G_gl.depthFunc(G_gl.LEQUAL);
+    G_gl.blendFunc(G_gl.SRC_ALPHA, G_gl.ONE_MINUS_SRC_ALPHA);
 
-    let o;
-    for (o in G_Objects){
-        G_Objects[o].render(G_camera.projectionMatrix, G_camera.viewMatrix);
-    }
+    G_gl.clearColor(1.0,1.0,1.0,1.0);
+
+    utils.resizeCanvasToDisplaySize(G_gl.canvas);
+    G_gl.viewport(0, 0, G_gl.canvas.width, G_gl.canvas.height);
 }
 
-function render(now) {
-    now *= 0.001;  // convert to seconds
-    const deltaTime = now - then;
-    then = now;
+function main() {
 
-    drawScene(then, deltaTime);
-    G_camera.updateViewMatrix();
+    initWebGL();
 
-    requestAnimationFrame(render);
+    // Create the Camera
+    let camera = new Camera(G_gl, 45);
+    camera.transform.position = vec3.fromValues(0, 0, 100);
+    camera.transform.rotation = vec3.fromValues(0, 0, 0);
+    let cameraController = new CameraController(G_gl, camera);
+
+    //load skybox
+    let skyModel = loadSkyBox(camera);
+    // Load Models
+    let objects = [];
+    let iter;
+    for (iter of objectData){
+        let model = new Model(G_gl, iter).setShaderPerspective(
+            camera.getProjectionMatrix());
+        objects.push(model);
+    }
+    let actualPosition = 0;
+    // Start the render loop
+    new RenderLoop((deltaTime) => {
+        cameraController.setDeltaTime(deltaTime);
+        camera.updateViewMatrix();
+        camera.updateProjectionMatrix();
+        G_gl.clear(G_gl.COLOR_BUFFER_BIT | G_gl.DEPTH_BUFFER_BIT);
+
+        // taking camera matrixes
+        let fixedView = camera.getFixedViewMatrix();
+        let nonFixedView = camera.getViewMatrix() ;
+        let projection = camera.getProjectionMatrix();
+
+        skyModel.setShaderPerspective(projection).render(fixedView);
+
+        for (iter of objects){
+            iter.setShaderPerspective(projection).render(nonFixedView);
+            iter.onTimePassing(deltaTime, actualPosition);
+        }
+    }).start();
+
 }
 
-function setModelViewMatrixes() {
-    let sunMVM = mat4.create();
-    console.log(sunMVM);
-    mat4.translate(sunMVM, sunMVM, [-.5, 0, -1]);  // amount to translate
-    mat4.scale(sunMVM, sunMVM, [.00002,.00002,.00002]); // THIS SUN IS HUUUUUUUGE
+function loadSkyBox(camera) {
+    // Load Texture
+    let skyTextureArray = [
+        document.getElementById("cubeRight"),
+        document.getElementById("cubeLeft"),
+        document.getElementById("cubeTop"),
+        document.getElementById("cubeBottom"),
+        document.getElementById("cubeBack"),
+        document.getElementById("cubeFront"),
+    ];
 
-    let terraMVM = mat4.create();
-    console.log(terraMVM);
-    mat4.translate(terraMVM, terraMVM, [.5, .5,-10]);  // amount to translate
-    mat4.scale(terraMVM, terraMVM, [1.5,1.5,1.5]);
+    // Create Model
+    let skyModel = new NewSkyBox(G_gl);
+    skyModel
+        .loadShader(vs_skyURL, fs_skyURL)
+        .setShaderPerspective(camera.getProjectionMatrix())
+        .loadTexture(skyTextureArray)
+        .setupBuffers();
 
-    G_Objects['sun'].setModelViewMatrix(sunMVM);
-    G_Objects['terra'].setModelViewMatrix(terraMVM);
+    return skyModel;
 }
 
-// ====================================================================
+main();
 
-
-function  main(data) {
-    let o;
-    for (o of data){
-        let res = loadMeshData(o.mesh);
-        G_Objects[o.name] = new Object(res, o.texture)
-    }
-
-    G_camera = new Camera(G_gl, 30, 0.1, 1000.0);
-    new CameraController(G_gl, G_camera);
-
-    setModelViewMatrixes();
-    for (o in G_Objects) {
-        G_Objects[o].lookup();
-    }
-    requestAnimationFrame(render);
-}
-
-// ====================================================================
-
-let requestMeshes = {
-    sun : function () {
-        return $.ajax({
-                url: "./data/assets/sun.obj",
-                dataType: 'text'
-            })
-    },
-    mercury : function () {
-
-    },
-    venus : function () {
-
-    },
-    terra : function () {
-        return $.ajax({
-                url: "./data/assets/terra1.obj",
-                dataType: 'text'
-            });
-    },
-    mars : function () {
-
-    },
-    jupiter : function () {
-
-    },
-    saturn : function () {
-
-    },
-    uran : function () {
-
-    },
-    neptune : function () {
-
-    },
-    pluto : function () {
-
-    }
-};
-$.when(
-    requestMeshes.sun(),
-    requestMeshes.mercury(),
-    requestMeshes.venus(),
-    requestMeshes.terra(),
-    requestMeshes.mars(),
-    requestMeshes.jupiter(),
-    requestMeshes.saturn(),
-    requestMeshes.uran(),
-    requestMeshes.neptune(),
-    requestMeshes.pluto()).done(( sun, mercury, venus, terra, mars, jupiter,saturn, urane, neptune, pluto) => {
-        let data = [
-            {
-                name : 'terra',
-                texture : G_TERRA_TEXTURE,
-                mesh : terra[0]
-            },
-            {
-                name : 'sun',
-                texture : G_SUN_TEXTURE,
-                mesh : sun[0]
-            }
-        ];
-        main(data)
-    });
+//
+// function loadSun(vertices, indices, normals, uvs, camera) {
+//     // Load texture
+//     let sunTexture = document.getElementById('sun');
+//
+//     // Create Model
+//     let sunModel = new Model(G_gl);
+//     sunModel
+//         .loadShader(vs_sunURL, fs_sunURL)
+//         .setShaderPerspective(camera.getProjectionMatrix())
+//         .loadTexture(sunTexture, true)
+//         .setupBuffers(vertices, indices, normals, uvs);
+//
+//     // Setup the transform of the Sun
+//     sunModel.transform.setScale(0.0005, 0.0005, 0.0005);
+//
+//     return sunModel;
+// }
+//
+// function loadEarth(vertices, indices, normals, uvs, camera) {
+//     // Load Texture
+//     let earthTexture = document.getElementById('earth');
+//
+//     // Create Model
+//     let earthModel = new Model(G_gl);
+//     earthModel
+//         .loadShader(vs_sunURL, fs_sunURL)
+//         .setShaderPerspective(camera.getProjectionMatrix())
+//         .loadTexture(earthTexture, true)
+//         .setupBuffers(vertices, indices, normals, uvs);
+//
+//     // Setup the transform of the Earth
+//     earthModel.transform.setScale(0.0005, 0.0005, 0.0005);
+//     earthModel.transform.setPosition(30, 0, -50);
+//
+//     return earthModel;
+// }
+// function loadModels() {
+//     utils.get_json('./assets/models/sun.json', function (mesh) {
+//         main(mesh)
+//     })
+// }
 

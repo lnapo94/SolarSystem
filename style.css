@@ -1,12 +1,16 @@
-body{
-    background-color: black;
-}
 canvas {
     border: .5vw solid black;
     background-color: antiquewhite;
-    width: 95vw;
-    height: 95vh;
+    width: 98vw;
+    height: 98vh;
+    display: block;
 }
+
+body {
+    margin: 0;
+    background-color: greenyellow;
+}
+
 video {
     display: none;
 }
