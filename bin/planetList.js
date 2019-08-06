@@ -8,6 +8,7 @@ let planetList = [
     {
         name : "SUN",
         mesh : "./assets/models/sun.json",
+        meshIndex: 0,
         vShaderURL : "./assets/shaders/sun/vs.glsl",
         fShaderURL : "./assets/shaders/sun/fs.glsl",
         texture : "sun",
@@ -36,6 +37,7 @@ let planetList = [
     {
         name : "EARTH",
         mesh : "./assets/models/earth.json",
+        meshIndex: 0,
         vShaderURL : "./assets/shaders/planet/vs.glsl",
         fShaderURL : "./assets/shaders/planet/fs.glsl",
         texture : "earth",
@@ -66,6 +68,7 @@ let planetList = [
     {
         name : "SATURN",
         mesh : "./assets/models/saturn.json",
+        meshIndex: 0,
         vShaderURL : "./assets/shaders/planet/vs.glsl",
         fShaderURL : "./assets/shaders/planet/fs.glsl",
         texture : "saturn",
@@ -96,6 +99,7 @@ let planetList = [
     {
         name : "SATURN",
         mesh : "./assets/models/saturn.json",
+        meshIndex: 1,
         vShaderURL : "./assets/shaders/planet/vs.glsl",
         fShaderURL : "./assets/shaders/planet/fs.glsl",
         texture : "saturn-ring",

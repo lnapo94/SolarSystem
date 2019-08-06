@@ -1,18 +1,15 @@
+let meshArray = [];
+let modelCount = 0;
+
 function loadModels() {
-    let meshArray = [];
-    utils.get_json(planetList[0].mesh, function (sunMesh) {
-        meshArray.push(sunMesh.meshes[0]);
-        utils.get_json(planetList[1].mesh, function (earthMesh) {
-            meshArray.push(earthMesh.meshes[0]);
-            utils.get_json(planetList[2].mesh, function (saturnMesh) {
-                meshArray.push(saturnMesh.meshes[0]);
-                utils.get_json(planetList[3].mesh, function (saturnMesh) {
-                    meshArray.push(saturnMesh.meshes[1]);
-                    main(meshArray)
-                });
-            });
-        });
-    })
+    if(modelCount < planetList.length) {
+        utils.get_json(planetList[modelCount].mesh, function(loadedMesh) {
+            meshArray.push(loadedMesh.meshes[planetList[modelCount].meshIndex]);
+            modelCount++;
+            loadModels();
+        })
+    } else
+        main(meshArray);
 }
 
 function initWebGL() {
@@ -50,7 +47,7 @@ function main(mesh) {
     let cameraController = new CameraController(G_gl, camera);
 
     // Load Models
-    let skyModel = loadSkyBox(camera);
+    let skyModel = loadSkyBox();
 
     let planets = [];
 
@@ -181,7 +178,7 @@ function loadSaturn(saturnMeshes) {
     return {saturn: saturnModel, ring: saturnRing};
 }
 
-function loadSkyBox(camera) {
+function loadSkyBox() {
     // Load Texture
     let skyTextureArray = [
         document.getElementById("cubeRight"),
@@ -196,7 +193,6 @@ function loadSkyBox(camera) {
     let skyModel = new SkyBox(G_gl);
     skyModel
         .loadShader(vs_skyURL, fs_skyURL)
-        .setShaderPerspective(camera.getProjectionMatrix())
         .loadTexture(skyTextureArray)
         .setupBuffers();
 
