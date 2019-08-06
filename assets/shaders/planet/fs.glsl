@@ -21,7 +21,7 @@ void main() {
     vec3 pointLightColor = lightColor * pow(250.0 / length(uLightPosition - fs_pos), 2.0);
 
     // Ambient Light
-    float ambientPower = 0.15;
+    float ambientPower = 0.25;
     vec3 ambient = ambientPower * lightColor;
 
     // Diffuse Light

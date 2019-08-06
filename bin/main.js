@@ -4,7 +4,10 @@ function loadModels() {
         meshArray.push(sunMesh);
         utils.get_json('./assets/models/earth.json', function (earthMesh) {
             meshArray.push(earthMesh);
-            main(meshArray);
+            utils.get_json('./assets/models/saturn.json', function (saturnMesh) {
+                meshArray.push(saturnMesh);
+                main(meshArray);
+            })
         })
     })
 }
@@ -55,10 +58,23 @@ function main(mesh) {
     let earthUVs = mesh[1].meshes[0].texturecoords[0];
     let earthNormals = mesh[1].meshes[0].normals;
 
+    // Load Saturn Ring
+    let saturnRingVertices = mesh[2].meshes[1].vertices;
+    let saturnRingIndices = [].concat.apply([], mesh[2].meshes[1].faces);
+    let saturnRingUVs = mesh[2].meshes[1].texturecoords[0];
+    let saturnRingNormals = mesh[2].meshes[1].normals;
+
+    // Load Saturn Gas
+    let saturnVertices = mesh[2].meshes[0].vertices;
+    let saturnIndices = [].concat.apply([], mesh[2].meshes[0].faces);
+    let saturnUVs = mesh[2].meshes[0].texturecoords[0];
+    let saturnNormals = mesh[2].meshes[0].normals;
+
     // Load Models
     let skyModel = loadSkyBox(camera);
     let sunModel = loadSun(sunVertices, sunIndices, sunNormals, sunUVs);
     let earthModel = loadEarth(earthVertices, earthIndices, earthNormals, earthUVs);
+    let saturnModel = loadSaturn(saturnVertices, saturnIndices, saturnNormals, saturnUVs, saturnRingVertices, saturnRingIndices, saturnRingNormals, saturnRingUVs);
 
     // Start the render loop
     new RenderLoop(onRender).start();
@@ -84,8 +100,25 @@ function main(mesh) {
             .setShaderCameraPosition(camera.transform.position)
             .render(camera.getViewMatrix(), true);
         earthModel.transform.addRotation(0, deltaTime * 100, 0);
-        earthModel.transform.setPosition(180 * Math.cos(actualPosition), 0, -100 * Math.sin(actualPosition));
+        earthModel.transform.setPosition(180 * Math.cos(actualPosition) + 70, 0, -150 * Math.sin(actualPosition));
         actualPosition += deltaTime * 0.5;
+
+        saturnModel.saturn
+            .setShaderPerspective(camera.getProjectionMatrix())
+            .setShaderNormalMatrix(saturnModel.saturn.transform.getNormalMatrix())
+            .setShaderLightPosition(vec3.fromValues(0, 0, 0))
+            .setShaderCameraPosition(camera.transform.position)
+            .render(camera.getViewMatrix(), true);
+        saturnModel.saturn.transform.setPosition(-180 * Math.cos(actualPosition) + 70, 0, 150 * Math.sin(actualPosition));
+
+        saturnModel.ring
+            .setShaderPerspective(camera.getProjectionMatrix())
+            .setShaderNormalMatrix(saturnModel.ring.transform.getNormalMatrix())
+            .setShaderLightPosition(vec3.fromValues(0, 0, 0))
+            .setShaderCameraPosition(camera.transform.position)
+            .render(camera.getViewMatrix(), true);
+        saturnModel.ring.transform.setPosition(-180 * Math.cos(actualPosition) + 70, 0, 150 * Math.sin(actualPosition));
+        saturnModel.ring.transform.setRotation(60, -60, 0)
     }
 }
 
@@ -112,7 +145,6 @@ function loadEarth(vertices, indices, normals, uvs) {
 
     // Create Model
     let earthModel = new PlanetModel(G_gl);
-    earthModel.noCulling = true;
     earthModel
         .loadShader(vs_planetURL, fs_planetURL, true)
         .loadTexture(earthTexture, true)
@@ -123,6 +155,30 @@ function loadEarth(vertices, indices, normals, uvs) {
     earthModel.transform.setRotation(0, 0, -20);
 
     return earthModel;
+}
+
+function loadSaturn(gasVertices, gasIndices, gasNormals, gasUVs, ringVertices, ringIndices, ringNormals, ringUVs) {
+    // Load texture
+    let saturnTexture = document.getElementById('saturn');
+    let saturnRingTexture = document.getElementById('saturn-ring');
+
+    // Create Model
+    let saturnModel = new PlanetModel(G_gl);
+    saturnModel
+        .loadShader(vs_planetURL, fs_planetURL)
+        .loadTexture(saturnTexture, false)
+        .setupBuffers(gasVertices, gasIndices, gasNormals, gasUVs);
+
+    let saturnRing = new PlanetModel(G_gl);
+    saturnRing
+        .loadShader(vs_planetURL, fs_planetURL)
+        .loadTexture(saturnRingTexture)
+        .setupBuffers(ringVertices, ringIndices, ringNormals, ringUVs);
+
+    saturnRing.transform.setScale(0.1, 0.1, 0.1);
+    saturnModel.transform.setScale(0.1, 0.1, 0.1);
+
+    return {saturn: saturnModel, ring: saturnRing};
 }
 
 function loadSkyBox(camera) {
