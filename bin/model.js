@@ -6,11 +6,28 @@ class Model {
         this.doBlending = false;
 
         this.mesh = {};
-        this.texture = null;
-        this.shader = null;
 
         // This class actually contains the information about the position in the world of the current model
         this.transform = new Transform();
+    }
+
+    loadMeshFromJSON(meshJson) {
+        let vertices = meshJson.vertices;
+        let indices = [].concat.apply([], meshJson.faces);
+        let UVs = meshJson.texturecoords[0];
+        let normals = meshJson.normals;
+        this.setupBuffers(vertices, indices, normals, UVs);
+
+        return this;
+    }
+
+    loadMeshFromOBJ(obj){
+        let meshResource = new OBJ.Mesh(obj);
+        this.setupBuffers(
+            meshResource.vertices,
+            meshResource.indices,
+            meshResource.vertexNormals,
+            meshResource.textures)
     }
 
     loadShader(vsURL, fsURL, validate = false) {
@@ -107,10 +124,10 @@ class Model {
         return this;
     }
 
-    render(cameraMatrix) {
+    render(cameraMatrix, useEulerAngles = false) {
 
         // Refresh the matrix
-        this.transform.updateMatrix();
+        this.transform.updateMatrix(useEulerAngles);
 
         // Enable the shader
         this.shader.enable();
@@ -150,6 +167,15 @@ class Model {
         this.shader.disable();
 
         return this;
+    }
+
+    setAnimationCallback(callback) {
+        this.callback = callback;
+    }
+
+    animate(deltaTime) {
+        let self = this;
+        this.callback(deltaTime, self);
     }
 
 }

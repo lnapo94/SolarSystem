@@ -1,4 +1,4 @@
-class NewSkyBox extends Model{
+class SkyBox extends Model{
 
     constructor(gl,width = 1000,height = 1000,depth = 1000,x = 0,y = 0,z = 0) {
         super(gl);

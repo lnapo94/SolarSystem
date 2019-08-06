@@ -1,14 +1,17 @@
 function loadModels() {
     let meshArray = [];
-    utils.get_json('./assets/models/sun.json', function (sunMesh) {
-        meshArray.push(sunMesh);
-        utils.get_json('./assets/models/earth.json', function (earthMesh) {
-            meshArray.push(earthMesh);
-            utils.get_json('./assets/models/saturn.json', function (saturnMesh) {
-                meshArray.push(saturnMesh);
-                main(meshArray);
-            })
-        })
+    utils.get_json(planetList[0].mesh, function (sunMesh) {
+        meshArray.push(sunMesh.meshes[0]);
+        utils.get_json(planetList[1].mesh, function (earthMesh) {
+            meshArray.push(earthMesh.meshes[0]);
+            utils.get_json(planetList[2].mesh, function (saturnMesh) {
+                meshArray.push(saturnMesh.meshes[0]);
+                utils.get_json(planetList[3].mesh, function (saturnMesh) {
+                    meshArray.push(saturnMesh.meshes[1]);
+                    main(meshArray)
+                });
+            });
+        });
     })
 }
 
@@ -48,14 +51,17 @@ function main(mesh) {
 
     // Load Models
     let skyModel = loadSkyBox(camera);
-    let sunModel = loadSun(mesh[0]);
-    let earthModel = loadEarth(mesh[1]);
-    let saturnModel = loadSaturn(mesh[2]);
+
+    let planets = [];
+
+    for(let i = 0; i < planetList.length; i++) {
+        let planet = new PlanetModel(G_gl, planetList[i], mesh[i]);
+        planet.setAnimationCallback(planetList[i].motion);
+        planets.push(planet)
+    }
 
     // Start the render loop
     new RenderLoop(onRender).start();
-
-    let actualPosition = 0;
 
     // Function which actually does the rendering
     function onRender(deltaTime) {
@@ -64,37 +70,30 @@ function main(mesh) {
         camera.updateProjectionMatrix();
         G_gl.clear(G_gl.COLOR_BUFFER_BIT | G_gl.DEPTH_BUFFER_BIT);
 
-        skyModel.setShaderPerspective(camera.getProjectionMatrix()).render(camera.getFixedViewMatrix());
+        // taking camera matrixes
+        let fixedView = camera.getFixedViewMatrix();
+        let nonFixedView = camera.getViewMatrix() ;
+        let projection = camera.getProjectionMatrix();
 
-        sunModel.setShaderPerspective(camera.getProjectionMatrix()).render(camera.getViewMatrix());
-        sunModel.transform.addRotation(0, deltaTime * 10, 0);
+        skyModel.setShaderPerspective(projection).render(fixedView);
 
-        earthModel
-            .setShaderPerspective(camera.getProjectionMatrix())
-            .setShaderNormalMatrix(earthModel.transform.getNormalMatrix())
-            .setShaderLightParameters(vec3.fromValues(0, 0, 0), 6000.0, 2.0, 0.15, 0.25)
-            .setShaderCameraPosition(camera.transform.position)
-            .render(camera.getViewMatrix(), true);
-        earthModel.transform.addRotation(0, deltaTime * 100, 0);
-        earthModel.transform.setPosition(180 * Math.cos(actualPosition) + 70, 0, -150 * Math.sin(actualPosition));
-        actualPosition += deltaTime * 0.5;
+        for(let i = 0; i < planets.length; i++) {
+            if(planets[i].name !== 'SUN') {
+                planets[i]
+                    .setShaderPerspective(projection)
+                    .setShaderNormalMatrix(planets[i].transform.getNormalMatrix())
+                    .setShaderLightParameters(vec3.fromValues(0, 0, 0), planetList[i].lightTargetDistance, planetList[i].lightDecay, planetList[i].lightAmbientPower, planetList[i].lightDiffusePower)
+                    .setShaderCameraPosition(camera.transform.position)
+                    .render(nonFixedView, true);
+            } else {
+                planets[i]
+                    .setShaderPerspective(projection)
+                    .render(nonFixedView);
+            }
 
-        saturnModel.saturn
-            .setShaderPerspective(camera.getProjectionMatrix())
-            .setShaderNormalMatrix(saturnModel.saturn.transform.getNormalMatrix())
-            .setShaderLightParameters(vec3.fromValues(0, 0, 0), 100.0, 2.0, 0.15, 0.25)
-            .setShaderCameraPosition(camera.transform.position)
-            .render(camera.getViewMatrix(), true);
-        saturnModel.saturn.transform.setPosition(-180 * Math.cos(actualPosition) + 70, 0, 150 * Math.sin(actualPosition));
+            planets[i].animate(deltaTime);
+        }
 
-        saturnModel.ring
-            .setShaderPerspective(camera.getProjectionMatrix())
-            .setShaderNormalMatrix(saturnModel.ring.transform.getNormalMatrix())
-            .setShaderLightParameters(vec3.fromValues(0, 0, 0), 100.0, 2.0, 0.15, 0.25)
-            .setShaderCameraPosition(camera.transform.position)
-            .render(camera.getViewMatrix(), true);
-        saturnModel.ring.transform.setPosition(-180 * Math.cos(actualPosition) + 70, 0, 150 * Math.sin(actualPosition));
-        saturnModel.ring.transform.setRotation(60, -60, 0)
     }
 }
 
@@ -194,7 +193,7 @@ function loadSkyBox(camera) {
     ];
 
     // Create Model
-    let skyModel = new NewSkyBox(G_gl);
+    let skyModel = new SkyBox(G_gl);
     skyModel
         .loadShader(vs_skyURL, fs_skyURL)
         .setShaderPerspective(camera.getProjectionMatrix())

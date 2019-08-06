@@ -1,6 +1,20 @@
 class PlanetModel extends Model{
-    constructor(gl) {
+    constructor(gl, modelData, jsonMesh) {
         super(gl);
+        this.noCulling = modelData.noCulling;
+        this.doBlending = modelData.doBlending;
+
+        this.name = modelData.name;
+
+        this.loadShader(modelData.vShaderURL, modelData.fShaderURL, true);
+
+        this.loadMeshFromJSON(jsonMesh);
+
+        this.loadTexture(document.getElementById(modelData.texture), modelData.doYFlip);
+
+        this.transform.setScale(modelData.scale.X, modelData.scale.Y, modelData.scale.Z);
+        this.transform.setPosition(modelData.position.X, modelData.position.Y, modelData.position.Z);
+
         return this;
     }
 
