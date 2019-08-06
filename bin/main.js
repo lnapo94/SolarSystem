@@ -46,35 +46,11 @@ function main(mesh) {
     camera.transform.setRotation(40, 0, 0);
     let cameraController = new CameraController(G_gl, camera);
 
-    // Load Sun Mesh
-    let sunVertices = mesh[0].meshes[0].vertices;
-    let sunIndices = [].concat.apply([], mesh[0].meshes[0].faces);
-    let sunUVs = mesh[0].meshes[0].texturecoords[0];
-    let sunNormals = mesh[0].meshes[0].normals;
-
-    // Load Earth Mesh
-    let earthVertices = mesh[1].meshes[0].vertices;
-    let earthIndices = [].concat.apply([], mesh[1].meshes[0].faces);
-    let earthUVs = mesh[1].meshes[0].texturecoords[0];
-    let earthNormals = mesh[1].meshes[0].normals;
-
-    // Load Saturn Ring
-    let saturnRingVertices = mesh[2].meshes[1].vertices;
-    let saturnRingIndices = [].concat.apply([], mesh[2].meshes[1].faces);
-    let saturnRingUVs = mesh[2].meshes[1].texturecoords[0];
-    let saturnRingNormals = mesh[2].meshes[1].normals;
-
-    // Load Saturn Gas
-    let saturnVertices = mesh[2].meshes[0].vertices;
-    let saturnIndices = [].concat.apply([], mesh[2].meshes[0].faces);
-    let saturnUVs = mesh[2].meshes[0].texturecoords[0];
-    let saturnNormals = mesh[2].meshes[0].normals;
-
     // Load Models
     let skyModel = loadSkyBox(camera);
-    let sunModel = loadSun(sunVertices, sunIndices, sunNormals, sunUVs);
-    let earthModel = loadEarth(earthVertices, earthIndices, earthNormals, earthUVs);
-    let saturnModel = loadSaturn(saturnVertices, saturnIndices, saturnNormals, saturnUVs, saturnRingVertices, saturnRingIndices, saturnRingNormals, saturnRingUVs);
+    let sunModel = loadSun(mesh[0]);
+    let earthModel = loadEarth(mesh[1]);
+    let saturnModel = loadSaturn(mesh[2]);
 
     // Start the render loop
     new RenderLoop(onRender).start();
@@ -96,7 +72,7 @@ function main(mesh) {
         earthModel
             .setShaderPerspective(camera.getProjectionMatrix())
             .setShaderNormalMatrix(earthModel.transform.getNormalMatrix())
-            .setShaderLightPosition(vec3.fromValues(0, 0, 0))
+            .setShaderLightParameters(vec3.fromValues(0, 0, 0), 6000.0, 2.0, 0.15, 0.25)
             .setShaderCameraPosition(camera.transform.position)
             .render(camera.getViewMatrix(), true);
         earthModel.transform.addRotation(0, deltaTime * 100, 0);
@@ -106,7 +82,7 @@ function main(mesh) {
         saturnModel.saturn
             .setShaderPerspective(camera.getProjectionMatrix())
             .setShaderNormalMatrix(saturnModel.saturn.transform.getNormalMatrix())
-            .setShaderLightPosition(vec3.fromValues(0, 0, 0))
+            .setShaderLightParameters(vec3.fromValues(0, 0, 0), 100.0, 2.0, 0.15, 0.25)
             .setShaderCameraPosition(camera.transform.position)
             .render(camera.getViewMatrix(), true);
         saturnModel.saturn.transform.setPosition(-180 * Math.cos(actualPosition) + 70, 0, 150 * Math.sin(actualPosition));
@@ -114,7 +90,7 @@ function main(mesh) {
         saturnModel.ring
             .setShaderPerspective(camera.getProjectionMatrix())
             .setShaderNormalMatrix(saturnModel.ring.transform.getNormalMatrix())
-            .setShaderLightPosition(vec3.fromValues(0, 0, 0))
+            .setShaderLightParameters(vec3.fromValues(0, 0, 0), 100.0, 2.0, 0.15, 0.25)
             .setShaderCameraPosition(camera.transform.position)
             .render(camera.getViewMatrix(), true);
         saturnModel.ring.transform.setPosition(-180 * Math.cos(actualPosition) + 70, 0, 150 * Math.sin(actualPosition));
@@ -122,7 +98,13 @@ function main(mesh) {
     }
 }
 
-function loadSun(vertices, indices, normals, uvs) {
+function loadSun(sunMesh) {
+
+    let sunVertices = sunMesh.meshes[0].vertices;
+    let sunIndices = [].concat.apply([], sunMesh.meshes[0].faces);
+    let sunUVs = sunMesh.meshes[0].texturecoords[0];
+    let sunNormals = sunMesh.meshes[0].normals;
+
     // Load texture
     let sunTexture = document.getElementById('sun');
 
@@ -131,7 +113,7 @@ function loadSun(vertices, indices, normals, uvs) {
     sunModel
         .loadShader(vs_sunURL, fs_sunURL)
         .loadTexture(sunTexture, true)
-        .setupBuffers(vertices, indices, normals, uvs);
+        .setupBuffers(sunVertices, sunIndices, sunNormals, sunUVs);
 
     // Setup the transform of the Sun
     sunModel.transform.setScale(0.002, 0.002, 0.002);
@@ -139,7 +121,13 @@ function loadSun(vertices, indices, normals, uvs) {
     return sunModel;
 }
 
-function loadEarth(vertices, indices, normals, uvs) {
+function loadEarth(earthMesh) {
+
+    let earthVertices = earthMesh.meshes[0].vertices;
+    let earthIndices = [].concat.apply([], earthMesh.meshes[0].faces);
+    let earthUVs = earthMesh.meshes[0].texturecoords[0];
+    let earthNormals = earthMesh.meshes[0].normals;
+
     // Load Texture
     let earthTexture = document.getElementById('earth');
 
@@ -148,7 +136,7 @@ function loadEarth(vertices, indices, normals, uvs) {
     earthModel
         .loadShader(vs_planetURL, fs_planetURL, true)
         .loadTexture(earthTexture, true)
-        .setupBuffers(vertices, indices, normals, uvs);
+        .setupBuffers(earthVertices, earthIndices, earthNormals, earthUVs);
 
     // Setup the transform of the Earth
     earthModel.transform.setScale(200, 200, 200);
@@ -157,7 +145,20 @@ function loadEarth(vertices, indices, normals, uvs) {
     return earthModel;
 }
 
-function loadSaturn(gasVertices, gasIndices, gasNormals, gasUVs, ringVertices, ringIndices, ringNormals, ringUVs) {
+function loadSaturn(saturnMeshes) {
+
+    // Load Saturn Ring
+    let saturnRingVertices = saturnMeshes.meshes[1].vertices;
+    let saturnRingIndices = [].concat.apply([], saturnMeshes.meshes[1].faces);
+    let saturnRingUVs = saturnMeshes.meshes[1].texturecoords[0];
+    let saturnRingNormals = saturnMeshes.meshes[1].normals;
+
+    // Load Saturn Gas
+    let saturnVertices = saturnMeshes.meshes[0].vertices;
+    let saturnIndices = [].concat.apply([], saturnMeshes.meshes[0].faces);
+    let saturnUVs = saturnMeshes.meshes[0].texturecoords[0];
+    let saturnNormals = saturnMeshes.meshes[0].normals;
+
     // Load texture
     let saturnTexture = document.getElementById('saturn');
     let saturnRingTexture = document.getElementById('saturn-ring');
@@ -167,13 +168,13 @@ function loadSaturn(gasVertices, gasIndices, gasNormals, gasUVs, ringVertices, r
     saturnModel
         .loadShader(vs_planetURL, fs_planetURL)
         .loadTexture(saturnTexture, false)
-        .setupBuffers(gasVertices, gasIndices, gasNormals, gasUVs);
+        .setupBuffers(saturnVertices, saturnIndices, saturnNormals, saturnUVs);
 
     let saturnRing = new PlanetModel(G_gl);
     saturnRing
         .loadShader(vs_planetURL, fs_planetURL)
         .loadTexture(saturnRingTexture)
-        .setupBuffers(ringVertices, ringIndices, ringNormals, ringUVs);
+        .setupBuffers(saturnRingVertices, saturnRingIndices, saturnRingNormals, saturnRingUVs);
 
     saturnRing.transform.setScale(0.1, 0.1, 0.1);
     saturnModel.transform.setScale(0.1, 0.1, 0.1);
