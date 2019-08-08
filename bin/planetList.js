@@ -82,7 +82,7 @@ let planetList = [
             speed : 0.1,
             translation: {
                 X : (position) => { return (-155 * Math.cos(position))*1},
-                Y : (position) => { return 0},
+                Y : (position) => { return (-15 * Math.cos(position))*1},
                 Z : (position) => { return (-150 * Math.sin(position))*1 },
             },
             rotation: {
@@ -167,7 +167,7 @@ let planetList = [
         lightAmbientPower: 0.15,
         lightDiffusePower: 0.35,
         motion : {
-            speed : 0,
+            speed : 0.2,
             translation: {
                 X : (position) => { return (-155 * Math.cos(position) )*3},
                 Y : (position) => { return 0},
@@ -219,7 +219,7 @@ let planetList = [
             speed : 1.2,
             translation: {
                 X : (position) => { return (150 * Math.cos(position))*0.2},
-                Y : (position) => { return 0},
+                Y : (position) => { return (-15 * Math.cos(position))*1},
                 Z : (position) => { return (-150 * Math.sin(position))*0.2 },
             },
             rotation: {
@@ -529,7 +529,7 @@ let planetList = [
             speed : .02,
             translation: {
                 X : (position) => { return (-155 * Math.cos(position))*12},
-                Y : (position) => { return 0},
+                Y : (position) => { return (-30 * Math.cos(position))*12},
                 Z : (position) => { return (-150 * Math.sin(position))*12 },
             },
             rotation: {
