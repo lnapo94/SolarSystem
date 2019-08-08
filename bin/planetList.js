@@ -74,7 +74,7 @@ let planetList = [
             Y : 20,
             Z : 20
         },
-        lightTargetDistance: 5000.0,
+        lightTargetDistance: 20000.0,
         lightDecay: 1.0,
         lightAmbientPower: 0.15,
         lightDiffusePower: 0.25,

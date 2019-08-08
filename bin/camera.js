@@ -88,7 +88,7 @@ class CameraController {
         }
         this.pointedPlanetIdx = -1;
         this.movementSpeed = 1000;
-        this.rotationSpeed = 600;
+        this.rotationSpeed = 300;
         this.deltaTime = 0.016;
 
         this.offsetX = box.left;						//Help calc global x,y mouse cords.
