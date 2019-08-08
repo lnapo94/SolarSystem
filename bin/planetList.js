@@ -386,8 +386,8 @@ let planetList = [
         },
         scale : {
             X : 0.3,
-            Y : 0.1,
-            Z : 0.3
+            Y : 0.3,
+            Z : 0.1
         },
         lightTargetDistance: 700.0,
         lightDecay: 1.0,
