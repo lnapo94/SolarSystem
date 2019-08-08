@@ -1,132 +1,189 @@
-import {Object} from "../data/planets.js";
+let modelCount = 0;
 
-let then = 0;
+function loadModels() {
+    if(modelCount < planetList.length) {
+        utils.get_json(planetList[modelCount].mesh, function(loadedMesh) {
+            planetList[modelCount].loadedMesh = loadedMesh.meshes[planetList[modelCount].meshIndex];
+            modelCount++;
+            loadModels();
+        })
+    } else
+        main();
+}
 
-function drawScene(then, deltatime) {
-    // TODO THIS IS AN ANTIPATTERN, BETTER TO CHANGE IT
-    G_gl.viewport(0, 0, G_gl.canvas.width, G_gl.canvas.height);
-    G_gl.clearColor(0.0, 0.0, 0.0, 1.0);  // Clear to black, fully opaque
-    G_gl.clearDepth(1.0);                 // Clear everything
-    G_gl.enable(G_gl.DEPTH_TEST);           // Enable depth testing
-    G_gl.depthFunc(G_gl.LEQUAL);            // Near things obscure far things
+function initWebGL() {
+    // Create the G_canvas and attach it to the body
+    G_canvas = utils.createCanvas();
+    G_gl = canvas.getContext('webgl2');
+
+    /**
+     *  WEBGL INITIALIZATION
+     */
+    G_gl.cullFace(G_gl.BACK);
+    G_gl.frontFace(G_gl.CCW);
+    G_gl.enable(G_gl.DEPTH_TEST);
     G_gl.enable(G_gl.CULL_FACE);
-    G_gl.clear(G_gl.COLOR_BUFFER_BIT | G_gl.DEPTH_BUFFER_BIT);      // Clear the canvas before we start drawing on it.
+    G_gl.depthFunc(G_gl.LEQUAL);
+    G_gl.blendFunc(G_gl.SRC_ALPHA, G_gl.ONE_MINUS_SRC_ALPHA);
 
-    let o;
-    for (o in G_Objects){
-        G_Objects[o].render(G_camera.projectionMatrix, G_camera.viewMatrix);
-    }
+    G_gl.clearColor(1.0,1.0,1.0,1.0);
+
+    utils.resizeCanvasToDisplaySize(G_gl.canvas);
+    G_gl.viewport(0, 0, G_gl.drawingBufferWidth, G_gl.drawingBufferHeight);
+    /**
+     *  END WEBGL INITIALIZATION
+     */
 }
 
-function render(now) {
-    now *= 0.001;  // convert to seconds
-    const deltaTime = now - then;
-    then = now;
+function main() {
 
-    drawScene(then, deltaTime);
-    G_camera.updateViewMatrix();
+    initWebGL();
 
-    requestAnimationFrame(render);
-}
+    // Create the Camera
+    let camera = new Camera(G_gl, 45);
+    camera.transform.position = vec3.fromValues(0, 200, 200);
+    camera.transform.setRotation(40, 0, 0);
 
-function setModelViewMatrixes() {
-    let sunMVM = mat4.create();
-    console.log(sunMVM);
-    mat4.translate(sunMVM, sunMVM, [-.5, 0, -1]);  // amount to translate
-    mat4.scale(sunMVM, sunMVM, [.00002,.00002,.00002]); // THIS SUN IS HUUUUUUUGE
-
-    let terraMVM = mat4.create();
-    console.log(terraMVM);
-    mat4.translate(terraMVM, terraMVM, [.5, .5,-10]);  // amount to translate
-    mat4.scale(terraMVM, terraMVM, [1.5,1.5,1.5]);
-
-    G_Objects['sun'].setModelViewMatrix(sunMVM);
-    G_Objects['terra'].setModelViewMatrix(terraMVM);
-}
-
-// ====================================================================
-
-
-function  main(data) {
-    let o;
-    for (o of data){
-        let res = loadMeshData(o.mesh);
-        G_Objects[o.name] = new Object(res, o.texture)
+    // Load Models
+    let skyModel = loadSkyBox(camera);
+    let planets = [];
+    for(let planetData of planetList) {
+        let planet;
+        if (planetData.name === "SUN"){
+            planet = new SunModel(G_gl, planetData);
+        } else {
+            planet = new PlanetModel(G_gl, planetData);
+        }
+        planets.push({
+            model : planet,
+            parent : planetData.parent
+        });
     }
 
-    G_camera = new Camera(G_gl, 30, 0.1, 1000.0);
-    new CameraController(G_gl, G_camera);
+    let cameraController = new CameraController(G_gl, camera, planets);
 
-    setModelViewMatrixes();
-    for (o in G_Objects) {
-        G_Objects[o].lookup();
-    }
-    requestAnimationFrame(render);
+    let sceneGraph = buildGraph(planets);
+    // Start the render loop
+    new RenderLoop((deltaTime) => {
+        utils.resizeCanvasToDisplaySize(G_canvas, 1);
+        G_gl.viewport(0, 0, G_gl.drawingBufferWidth, G_gl.drawingBufferHeight);
+        cameraController.onTimePassed();
+        cameraController.setDeltaTime(deltaTime);
+        camera.updateViewMatrix();
+        camera.updateProjectionMatrix();
+        G_gl.clear(G_gl.COLOR_BUFFER_BIT | G_gl.DEPTH_BUFFER_BIT);
+
+        // taking camera matrixes
+        let fixedView = camera.getFixedViewMatrix();
+        let nonFixedView = camera.getViewMatrix() ;
+        let projection = camera.getProjectionMatrix();
+
+        skyModel.setShaderPerspective(projection).render(fixedView);
+        sceneGraph.onTimePassed(deltaTime, projection, nonFixedView);
+    }).start();
+
 }
 
-// ====================================================================
+function loadSkyBox(camera) {
+    // Load Texture
+    let skyTextureArray = [
+        document.getElementById("cubeRight"),
+        document.getElementById("cubeLeft"),
+        document.getElementById("cubeTop"),
+        document.getElementById("cubeBottom"),
+        document.getElementById("cubeBack"),
+        document.getElementById("cubeFront"),
+    ];
 
-let requestMeshes = {
-    sun : function () {
-        return $.ajax({
-                url: "./data/assets/sun.obj",
-                dataType: 'text'
-            })
-    },
-    mercury : function () {
+    // Create Model
+    let skyModel = new SkyBox(G_gl);
+    skyModel
+        .loadShader(vs_skyURL, fs_skyURL)
+        .setShaderPerspective(camera.getProjectionMatrix())
+        .loadTexture(skyTextureArray)
+        .setupBuffers();
 
-    },
-    venus : function () {
+    return skyModel;
+}
 
-    },
-    terra : function () {
-        return $.ajax({
-                url: "./data/assets/terra1.obj",
-                dataType: 'text'
-            });
-    },
-    mars : function () {
 
-    },
-    jupiter : function () {
-
-    },
-    saturn : function () {
-
-    },
-    uran : function () {
-
-    },
-    neptune : function () {
-
-    },
-    pluto : function () {
-
-    }
-};
-$.when(
-    requestMeshes.sun(),
-    requestMeshes.mercury(),
-    requestMeshes.venus(),
-    requestMeshes.terra(),
-    requestMeshes.mars(),
-    requestMeshes.jupiter(),
-    requestMeshes.saturn(),
-    requestMeshes.uran(),
-    requestMeshes.neptune(),
-    requestMeshes.pluto()).done(( sun, mercury, venus, terra, mars, jupiter,saturn, urane, neptune, pluto) => {
-        let data = [
-            {
-                name : 'terra',
-                texture : G_TERRA_TEXTURE,
-                mesh : terra[0]
-            },
-            {
-                name : 'sun',
-                texture : G_SUN_TEXTURE,
-                mesh : sun[0]
-            }
-        ];
-        main(data)
-    });
+// function loadSun(sunMesh) {
+//
+//     let sunVertices = sunMesh.meshes[0].vertices;
+//     let sunIndices = [].concat.apply([], sunMesh.meshes[0].faces);
+//     let sunUVs = sunMesh.meshes[0].texturecoords[0];
+//     let sunNormals = sunMesh.meshes[0].normals;
+//
+//     // Load texture
+//     let sunTexture = document.getElementById('sun');
+//
+//     // Create Model
+//     let sunModel = new Model(G_gl);
+//     sunModel
+//         .loadShader(vs_sunURL, fs_sunURL)
+//         .loadTexture(sunTexture, true)
+//         .setupBuffers(sunVertices, sunIndices, sunNormals, sunUVs);
+//
+//     // Setup the transform of the Sun
+//     sunModel.transform.setScale(0.002, 0.002, 0.002);
+//
+//     return sunModel;
+// }
+//
+// function loadEarth(earthMesh) {
+//
+//     let earthVertices = earthMesh.meshes[0].vertices;
+//     let earthIndices = [].concat.apply([], earthMesh.meshes[0].faces);
+//     let earthUVs = earthMesh.meshes[0].texturecoords[0];
+//     let earthNormals = earthMesh.meshes[0].normals;
+//
+//     // Load Texture
+//     let earthTexture = document.getElementById('earth');
+//
+//     // Create Model
+//     setupBuffers(earthVertices, earthIndices, earthNormals, earthUVs);
+//
+//     // Setup the transform of the Earth
+//     earthModel.transform.setScale(200, 200, 200);
+//     earthModel.transform.setRotation(0, 0, -20);
+//
+//     return earthModel;
+// }
+//
+// function loadSaturn(saturnMeshes) {
+//
+//     // Load Saturn Ring
+//     let saturnRingVertices = saturnMeshes.meshes[1].vertices;
+//     let saturnRingIndices = [].concat.apply([], saturnMeshes.meshes[1].faces);
+//     let saturnRingUVs = saturnMeshes.meshes[1].texturecoords[0];
+//     let saturnRingNormals = saturnMeshes.meshes[1].normals;
+//
+//     // Load Saturn Gas
+//     let saturnVertices = saturnMeshes.meshes[0].vertices;
+//     let saturnIndices = [].concat.apply([], saturnMeshes.meshes[0].faces);
+//     let saturnUVs = saturnMeshes.meshes[0].texturecoords[0];
+//     let saturnNormals = saturnMeshes.meshes[0].normals;
+//
+//     // Load texture
+//     let saturnTexture = document.getElementById('saturn');
+//     let saturnRingTexture = document.getElementById('saturn-ring');
+//
+//     // Create Model
+//     let saturnRing = new PlanetModel(G_gl);
+//     saturnRing
+//         .loadShader(vs_planetURL, fs_planetURL)
+//         .loadTexture(saturnRingTexture)
+//         .setupBuffers(saturnRingVertices, saturnRingIndices, saturnRingNormals, saturnRingUVs);
+//
+//     let saturnModel = new PlanetModel(G_gl);
+//     saturnModel
+//         .loadShader(vs_planetURL, fs_planetURL)
+//         .loadTexture(saturnTexture, false)
+//         .setupBuffers(saturnVertices, saturnIndices, saturnNormals, saturnUVs);
+//
+//     saturnRing.transform.setScale(0.1, 0.1, 0.1);
+//     saturnModel.transform.setScale(0.1, 0.1, 0.1);
+//
+//     return {saturn: saturnModel, ring: saturnRing};
+// }
 

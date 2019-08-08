@@ -1,9 +1,9 @@
 class Camera{
-    constructor(gl,fov = 45, near = 0.1, far = 1000.0){
+    constructor(gl,fov = 45, near = 1, far = 100000.0){
         //Setup the perspective matrix
         this.projectionMatrix = mat4.create();
 
-        this.ratio = gl.canvas.width / gl.canvas.height;
+        this.ratio = gl.canvas.clientWidth / gl.canvas.clientHeight;
         this.fov = fov;
         this.near = near;
         this.far = far;
@@ -70,14 +70,25 @@ class Camera{
 }
 
 class CameraController {
-    constructor(gl, camera) {
+    constructor(gl, camera, planetList) {
         this.gl = gl;
         this.camera = camera;
         let box = gl.canvas.getBoundingClientRect();
         this.canvas = gl.canvas;
 
-        this.movementSpeed = 100;
-        this.rotationSpeed = 30;
+        this.cameraMode = 'FREE';
+
+        // we want to cycle with the camera lock only those objects which are
+        // orbiting directly around the sun
+        this.planetList = [];
+        for (let obj of planetList){
+            if(obj.parent === "SUN" || obj.parent === "ROOT"){
+                this.planetList.push(obj);
+            }
+        }
+        this.pointedPlanetIdx = -1;
+        this.movementSpeed = 1000;
+        this.rotationSpeed = 600;
         this.deltaTime = 0.016;
 
         this.offsetX = box.left;						//Help calc global x,y mouse cords.
@@ -91,23 +102,23 @@ class CameraController {
         let self = this;
 
         function keyDownHandler(event) {
-            if(event.keyCode === 39) {
+            if(event.keyCode === 39 && self.cameraMode === "FREE") {
                 self.camera.moveX(self.deltaTime * self.movementSpeed);
             }
-            else if(event.keyCode === 37) {
+            else if(event.keyCode === 37 && self.cameraMode === "FREE") {
                 self.camera.moveX(-self.deltaTime * self.movementSpeed);
             }
-            if(event.keyCode === 40) {
+            if(event.keyCode === 40 && self.cameraMode === "FREE") {
                 self.camera.moveY(-self.deltaTime * self.movementSpeed);
             }
-            else if(event.keyCode === 38) {
+            else if(event.keyCode === 38 && self.cameraMode === "FREE") {
                 self.camera.moveY(self.deltaTime * self.movementSpeed);
             }
 
-            if(event.keyCode === 87) {
+            if(event.keyCode === 87 && self.cameraMode === "FREE") {
                 self.camera.moveZ(-self.deltaTime * self.movementSpeed)
             }
-            else if(event.keyCode === 83) {
+            else if(event.keyCode === 83 && self.cameraMode === "FREE") {
                 self.camera.moveZ(self.deltaTime * self.movementSpeed);
             }
 
@@ -115,6 +126,26 @@ class CameraController {
                 self.camera.transform.addRotation(0, 0, -self.rotationSpeed * self.deltaTime);
             } else if(event.keyCode === 69) {
                 self.camera.transform.addRotation(0, 0, self.rotationSpeed * self.deltaTime);
+            }
+
+            if(event.keyCode === 32){
+                self.pointedPlanetIdx += 1;
+                //we also want the planet to be visible
+                self.camera.transform.setRotation(
+                    22.334392547607422,
+                    -44.63939666748047,
+                    -0.8242999911308289);
+                if (self.pointedPlanetIdx === self.planetList.length){
+                    self.pointedPlanetIdx = -1;
+                }
+                if (self.pointedPlanetIdx !== -1) { self.cameraMode = "LCKD"}
+                else {
+                    self.cameraMode = "FREE";
+                }
+            }
+            if(event.keyCode === 18){
+                self.cameraMode = "FREE";
+                self.pointedPlanetIdx = -1;
             }
         }
 
@@ -154,11 +185,11 @@ class CameraController {
         let delta = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail)));
         this.camera.fov += delta;
 
-        if(this.camera.fov > 90)
-            this.camera.fov = 90;
+        if(this.camera.fov > 70)
+            this.camera.fov = 70;
 
-        if(this.camera.fov < 10)
-            this.camera.fov = 10;
+        if(this.camera.fov < 45)
+            this.camera.fov = 45;
     }
 
     onMouseMove(e){
@@ -171,5 +202,17 @@ class CameraController {
 
         this.prevX = x;
         this.prevY = y;
+    }
+
+    onTimePassed(){
+        if (this.cameraMode === "FREE"){
+            return 0;
+        }
+        else {
+            let lockedPos = this.planetList[this.pointedPlanetIdx]
+                .model.transform.getPosition();
+            vec3.copy(this.camera.transform.position, lockedPos);
+            this.camera.transform.addPosition(75, 40, 75);
+        }
     }
 }

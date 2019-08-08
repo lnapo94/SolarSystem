@@ -1,5 +1,4 @@
 let animationParams = {
-    mercuryPosition: 0,
     earthPosition: 0,
     saturnPosition: 0,
     saturnRingPosition: 0
@@ -21,10 +20,10 @@ let planetList = [
             Y : 0,
             Z : 0
         },
-        rotation: {
+        orientation : {
             X : 0,
             Y : 0,
-            Z : 0
+            Z : 0,
         },
         scale : {
             X : .002,
@@ -35,10 +34,20 @@ let planetList = [
         lightDecay: null,
         lightAmbientPower: null,
         lightDiffusePower: null,
-        motion : function (deltaTime, model) {
-            // model.transform.addRotation(0, deltaTime * 10, 0);
+        motion : {
+            speed : 0,
+            translation: {
+                X : (position) => { return 0},
+                Y : (position) => { return 0},
+                Z : (position) => { return 0},
+            },
+            rotation: {
+                X : (dt) => { return 0},
+                Y : (dt) => { return 10 * dt},
+                Z : (dt) => { return 0},
+            }
         },
-        children : [ ]
+        parent : 'ROOT'
     },
     {
         name : "MERCURY",
@@ -48,33 +57,41 @@ let planetList = [
         fShaderURL : "./assets/shaders/planet/fs.glsl",
         texture : "mercury",
         doYFlip: true,
-        noCulling: true,
+        noCulling: false,
         doBlending: false,
         position : {
-            X : 100,
-            Y : 0,
-            Z : 0
-        },
-        rotation: {
             X : 0,
             Y : 0,
-            Z : 0
+            Z : -20
+        },
+        orientation : {
+            X : 0,
+            Y : 0,
+            Z : 0,
         },
         scale : {
-            X : 70,
-            Y : 70,
-            Z : 70
+            X : 20,
+            Y : 20,
+            Z : 20
         },
-        lightTargetDistance: 2700.0,
-        lightDecay: 2.0,
-        lightAmbientPower: 0.5, //0.15
+        lightTargetDistance: 5000.0,
+        lightDecay: 1.0,
+        lightAmbientPower: 0.15,
         lightDiffusePower: 0.25,
-        motion : function (deltaTime, model) {
-            // model.transform.addRotation(0, deltaTime * 100, 0);
-            // model.transform.setPosition(-150 * Math.cos(animationParams.mercuryPosition) + 20, 0, 200 * Math.sin(animationParams.mercuryPosition));
-            // animationParams.mercuryPosition += deltaTime * 0.5;
+        motion : {
+            speed : 0.1,
+            translation: {
+                X : (position) => { return (-155 * Math.cos(position))*1},
+                Y : (position) => { return 0},
+                Z : (position) => { return (-150 * Math.sin(position))*1 },
+            },
+            rotation: {
+                X : (dt) => { return 15 * dt},
+                Y : (dt) => { return 7 * dt},
+                Z : (dt) => { return 0},
+            }
         },
-        children : [ ]
+        parent : 'SUN'
     },
     {
         name : "VENUS",
@@ -84,33 +101,41 @@ let planetList = [
         fShaderURL : "./assets/shaders/planet/fs.glsl",
         texture : "venus",
         doYFlip: true,
-        noCulling: true,
+        noCulling: false,
         doBlending: false,
         position : {
-            X : 150,
-            Y : 0,
-            Z : 0
-        },
-        rotation: {
             X : 0,
             Y : 0,
-            Z : 0
+            Z : -20
+        },
+        orientation : {
+            X : 0,
+            Y : 0,
+            Z : 0,
         },
         scale : {
-            X : 27,
-            Y : 27,
-            Z : 27
+            X : 10,
+            Y : 10,
+            Z : 10
         },
-        lightTargetDistance: 1800.0,
-        lightDecay: 2.0,
-        lightAmbientPower: 0.5, //0.15
+        lightTargetDistance: 3500.0,
+        lightDecay: 1.0,
+        lightAmbientPower: 0.15,
         lightDiffusePower: 0.25,
-        motion : function (deltaTime, model) {
-            // model.transform.addRotation(0, deltaTime * 100, 0);
-            // model.transform.setPosition(-150 * Math.cos(animationParams.mercuryPosition) + 20, 0, 200 * Math.sin(animationParams.mercuryPosition));
-            // animationParams.mercuryPosition += deltaTime * 0.5;
+        motion : {
+            speed : 0.1,
+            translation: {
+                X : (position) => { return (155 * Math.cos(position))*2},
+                Y : (position) => { return 0},
+                Z : (position) => { return (-150 * Math.sin(position))*2 },
+            },
+            rotation: {
+                X : (dt) => { return 15 * dt},
+                Y : (dt) => { return 7 * dt},
+                Z : (dt) => { return 0},
+            }
         },
-        children : [ ]
+        parent : 'SUN'
     },
     {
         name : "EARTH",
@@ -123,34 +148,47 @@ let planetList = [
         noCulling: false,
         doBlending: false,
         position : {
-            X : 200,
-            Y : 0,
-            Z : 0
-        },
-        rotation: {
             X : 0,
             Y : 0,
-            Z : 0
+            Z : -50
+        },
+        orientation : {
+            X : 0,
+            Y : 0,
+            Z : 0,
         },
         scale : {
-            X : 220,
-            Y : 220,
-            Z : 220
+            X : 100,
+            Y : 100,
+            Z : 100
         },
-        lightTargetDistance: 12000.0,
+        lightTargetDistance: 6500.0,
         lightDecay: 2.0,
-        lightAmbientPower: 0.5, //0.15
-        lightDiffusePower: 0.25,
-        motion : function (deltaTime, model) {
+        lightAmbientPower: 0.15,
+        lightDiffusePower: 0.35,
+        motion : {
+            speed : 0,
+            translation: {
+                X : (position) => { return (-155 * Math.cos(position) )*3},
+                Y : (position) => { return 0},
+                Z : (position) => { return (-150 * Math.sin(position))*3 },
+            },
+            rotation: {
+                X : (dt) => { return 0},
+                Y : (dt) => { return 100 * dt},
+                Z : (dt) => { return 0},
+            }
+        },
+            
+            // function (deltaTime, model) {
             // model.transform.addRotation(0, deltaTime * 100, 0);
             // model.transform.setPosition(180 * Math.cos(animationParams.earthPosition) + 70, 0, -150 * Math.sin(animationParams.earthPosition));
             // animationParams.earthPosition += deltaTime * 0.5;
-        },
-        children : [ ]
+        parent : 'SUN'
     },
     {
         name : "MOON",
-        mesh : "./assets/models/moon.json",
+        mesh : "./assets/models/earth.json",
         meshIndex: 0,
         vShaderURL : "./assets/shaders/planet/vs.glsl",
         fShaderURL : "./assets/shaders/planet/fs.glsl",
@@ -159,30 +197,40 @@ let planetList = [
         noCulling: false,
         doBlending: false,
         position : {
-            X : 200,
-            Y : -100,
-            Z : 0
-        },
-        rotation: {
             X : 0,
             Y : 0,
-            Z : 0
+            Z : -5
+        },
+        orientation : {
+            X : 0,
+            Y : 0,
+            Z : 0,
         },
         scale : {
-            X : 0.3,
-            Y : 0.3,
-            Z : 0.3
+            X : 50,
+            Y : 50,
+            Z : 50
         },
-        lightTargetDistance: 300.0,
+        lightTargetDistance: 4500.0,
         lightDecay: 2.0,
-        lightAmbientPower: 0.5, //0.15
+        lightAmbientPower: 0.15,
         lightDiffusePower: 0.25,
-        motion : function (deltaTime, model) {
-            // model.transform.addRotation(0, deltaTime * 100, 0);
-            // model.transform.setPosition(180 * Math.cos(animationParams.earthPosition) + 70, 0, -150 * Math.sin(animationParams.earthPosition));
-            // animationParams.earthPosition += deltaTime * 0.5;
+        motion : {
+            speed : 1.2,
+            translation: {
+                X : (position) => { return (150 * Math.cos(position))*0.2},
+                Y : (position) => { return 0},
+                Z : (position) => { return (-150 * Math.sin(position))*0.2 },
+            },
+            rotation: {
+                X : (dt) => { return 0},
+                Y : (dt) => { return 100 * dt},
+                Z : (dt) => { return 0},
+            }
         },
-        children : [ ]
+
+        // function (deltaTime, model) {
+        parent : 'EARTH'
     },
     {
         name : "MARS",
@@ -195,30 +243,38 @@ let planetList = [
         noCulling: false,
         doBlending: false,
         position : {
-            X : 250,
-            Y : 0,
-            Z : 0
-        },
-        rotation: {
             X : 0,
             Y : 0,
-            Z : 0
+            Z : -20
+        },
+        orientation : {
+            X : 0,
+            Y : 0,
+            Z : 0,
         },
         scale : {
-            X : 5,
-            Y : 5,
-            Z : 5
+            X : 1,
+            Y : 1,
+            Z : 1
         },
         lightTargetDistance: 1000.0,
-        lightDecay: 2.0,
-        lightAmbientPower: 0.5, //0.15
+        lightDecay: 1.0,
+        lightAmbientPower: 0.15,
         lightDiffusePower: 0.25,
-        motion : function (deltaTime, model) {
-            // model.transform.addRotation(0, deltaTime * 100, 0);
-            // model.transform.setPosition(180 * Math.cos(animationParams.earthPosition) + 70, 0, -150 * Math.sin(animationParams.earthPosition));
-            // animationParams.earthPosition += deltaTime * 0.5;
+        motion : {
+            speed : 0.0825,
+            translation: {
+                X : (position) => { return (-155 * Math.cos(position))*4},
+                Y : (position) => { return 0},
+                Z : (position) => { return (-150 * Math.sin(position))*4 },
+            },
+            rotation: {
+                X : (dt) => { return 15 * dt},
+                Y : (dt) => { return 7 * dt},
+                Z : (dt) => { return 0},
+            }
         },
-        children : [ ]
+        parent : 'SUN'
     },
     {
         name : "JUPITER",
@@ -231,30 +287,38 @@ let planetList = [
         noCulling: false,
         doBlending: false,
         position : {
-            X : 300,
+            X : 0,
             Y : 0,
-            Z : 0
+            Z : -20
         },
-        rotation: {
+        orientation : {
             X : 90,
             Y : 0,
-            Z : 0
+            Z : 0,
         },
         scale : {
-            X : 0.035,
-            Y : 0.035,
-            Z : 0.035
+            X : 0.08,
+            Y : 0.08,
+            Z : 0.08
         },
-        lightTargetDistance: 100.0,
-        lightDecay: 2.0,
-        lightAmbientPower: 0.5, //0.15
+        lightTargetDistance: 300.0,
+        lightDecay: 1.0,
+        lightAmbientPower: 0.15,
         lightDiffusePower: 0.25,
-        motion : function (deltaTime, model) {
-            // model.transform.addRotation(0, deltaTime * 100, 0);
-            // model.transform.setPosition(180 * Math.cos(animationParams.earthPosition) + 70, 0, -150 * Math.sin(animationParams.earthPosition));
-            // animationParams.earthPosition += deltaTime * 0.5;
+        motion : {
+            speed : 0.075,
+            translation: {
+                X : (position) => { return (-155 * Math.cos(position))*6},
+                Y : (position) => { return 0},
+                Z : (position) => { return (-150 * Math.sin(position))*6 },
+            },
+            rotation: {
+                X : (dt) => { return 0},
+                Y : (dt) => { return 50 * dt},
+                Z : (dt) => { return 0},
+            }
         },
-        children : [ ]
+        parent : 'SUN'
     },
     {
         name : "SATURN",
@@ -267,30 +331,38 @@ let planetList = [
         noCulling: false,
         doBlending: false,
         position : {
-            X : 375,
+            X : 0,
             Y : 0,
-            Z : 0
+            Z : -20
         },
-        rotation: {
+        orientation : {
             X : 90,
             Y : 0,
-            Z : 0
+            Z : 0,
         },
         scale : {
-            X : 0.2,
-            Y : 0.2,
-            Z : 0.2
+            X : 0.3,
+            Y : 0.3,
+            Z : 0.3
         },
-        lightTargetDistance: 200.0,
+        lightTargetDistance: 900.0,
         lightDecay: 2.0,
-        lightAmbientPower: 0.5, //0.15
+        lightAmbientPower: 0.15,
         lightDiffusePower: 0.25,
-        motion : function (deltaTime, model) {
-            // model.transform.setPosition(-180 * Math.cos(animationParams.saturnPosition) + 70, 0, 150 * Math.sin(animationParams.saturnPosition));
-            // model.transform.setRotation(60, -60, 0);
-            // animationParams.saturnPosition += deltaTime * 0.5;
+        motion : {
+            speed : 0.06,
+            translation: {
+                X : (position) => { return (-155 * Math.cos(position))*8},
+                Y : (position) => { return 0},
+                Z : (position) => { return -150 * Math.sin(position)*8 },
+            },
+            rotation: {
+                X : (dt) => { return 0},
+                Y : (dt) => { return 100 * dt},
+                Z : (dt) => { return 0},
+            }
         },
-        children : []
+        parent : 'SUN'
     },
     {
         name : "SATURN-RING",
@@ -303,30 +375,38 @@ let planetList = [
         noCulling: false,
         doBlending: false,
         position : {
-            X : 375,
+            X : 0,
             Y : 0,
-            Z : 0
+            Z : -20
         },
-        rotation: {
-            X : 60,
+        orientation : {
+            X : 0,
             Y : 0,
-            Z : 0
+            Z : 0,
         },
         scale : {
-            X : 0.2,
-            Y : 0.2,
-            Z : 0.2
+            X : 0.3,
+            Y : 0.1,
+            Z : 0.3
         },
-        lightTargetDistance: 200.0,
-        lightDecay: 2.0,
-        lightAmbientPower: 0.5, //0.15
+        lightTargetDistance: 700.0,
+        lightDecay: 1.0,
+        lightAmbientPower: 0.15,
         lightDiffusePower: 0.25,
-        motion : function (deltaTime, model) {
-            // model.transform.setPosition(-180 * Math.cos(animationParams.saturnRingPosition) + 70, 0, 150 * Math.sin(animationParams.saturnRingPosition));
-            // model.transform.setRotation(60, -60, 0);
-            // animationParams.saturnRingPosition += deltaTime * 0.5;
+        motion : {
+            speed : 0.06,
+            translation: {
+                X : (position) => { return (-155 * Math.cos(position))*8},
+                Y : (position) => { return 0},
+                Z : (position) => { return (-150 * Math.sin(position))*8 },
+            },
+            rotation: {
+                X : (dt) => { return 15 * dt},
+                Y : (dt) => { return 7 * dt},
+                Z : (dt) => { return 0},
+            }
         },
-        children : []
+        parent : 'SUN'
     },
     {
         name : "URANUS",
@@ -339,30 +419,38 @@ let planetList = [
         noCulling: false,
         doBlending: false,
         position : {
-            X : 470,
-            Y : 0,
-            Z : 0
-        },
-        rotation: {
             X : 0,
             Y : 0,
-            Z : 90
+            Z : -20
+        },
+        orientation : {
+            X : 90,
+            Y : 0,
+            Z : 0,
         },
         scale : {
-            X : 0.07,
-            Y : 0.07,
-            Z : 0.07
+            X : 0.1,
+            Y : 0.1,
+            Z : 0.1
         },
-        lightTargetDistance: 200.0,
-        lightDecay: 2.0,
-        lightAmbientPower: 0.5, //0.15
-        lightDiffusePower: 0.25,
-        motion : function (deltaTime, model) {
-            // model.transform.addRotation(0, deltaTime * 100, 0);
-            // model.transform.setPosition(180 * Math.cos(animationParams.earthPosition) + 70, 0, -150 * Math.sin(animationParams.earthPosition));
-            // animationParams.earthPosition += deltaTime * 0.5;
+        lightTargetDistance: 300.0,
+        lightDecay: 1.0,
+        lightAmbientPower: 0.15,
+        lightDiffusePower: 0.30,
+        motion : {
+            speed : 0.04,
+            translation: {
+                X : (position) => { return (155 * Math.cos(position))*10},
+                Y : (position) => { return 0},
+                Z : (position) => { return (-150 * Math.sin(position))*10 },
+            },
+            rotation: {
+                X : (dt) => { return 70 * dt},
+                Y : (dt) => { return 0},
+                Z : (dt) => { return 0},
+            }
         },
-        children : [ ]
+        parent : 'SUN'
     },
     {
         name : "URANUS-RING",
@@ -375,30 +463,38 @@ let planetList = [
         noCulling: false,
         doBlending: false,
         position : {
-            X : 470,
-            Y : 0,
-            Z : 0
-        },
-        rotation: {
             X : 0,
             Y : 0,
-            Z : 90
+            Z : -20
+        },
+        orientation : {
+            X : 0,
+            Y : 0,
+            Z : 0,
         },
         scale : {
-            X : 0.07,
-            Y : 0.07,
-            Z : 0.07
+            X : 0.1,
+            Y : 0.1,
+            Z : 0.1
         },
-        lightTargetDistance: 200.0,
-        lightDecay: 2.0,
-        lightAmbientPower: 0.5, //0.15
-        lightDiffusePower: 0.25,
-        motion : function (deltaTime, model) {
-            // model.transform.addRotation(0, deltaTime * 100, 0);
-            // model.transform.setPosition(180 * Math.cos(animationParams.earthPosition) + 70, 0, -150 * Math.sin(animationParams.earthPosition));
-            // animationParams.earthPosition += deltaTime * 0.5;
+        lightTargetDistance: 300.0,
+        lightDecay: 1.0,
+        lightAmbientPower: 0.15,
+        lightDiffusePower: 0.30,
+        motion : {
+            speed : 0.04,
+            translation: {
+                X : (position) => { return (155 * Math.cos(position))*10},
+                Y : (position) => { return 0},
+                Z : (position) => { return (-150 * Math.sin(position))*10 },
+            },
+            rotation: {
+                X : (dt) => { return 70 * dt},
+                Y : (dt) => { return 0},
+                Z : (dt) => { return 0},
+            }
         },
-        children : [ ]
+        parent : 'SUN'
     },
     {
         name : "NEPTUNE",
@@ -411,29 +507,37 @@ let planetList = [
         noCulling: false,
         doBlending: false,
         position : {
-            X : 540,
-            Y : 0,
-            Z : 0
-        },
-        rotation: {
             X : 0,
             Y : 0,
-            Z : 0
+            Z : -20
+        },
+        orientation : {
+            X : 0,
+            Y : 0,
+            Z : 0,
         },
         scale : {
-            X : 0.004,
-            Y : 0.004,
-            Z : 0.004
+            X : 0.007,
+            Y : 0.007,
+            Z : 0.007
         },
-        lightTargetDistance: 90.0,
-        lightDecay: 2.0,
-        lightAmbientPower: 0.5, //0.15
+        lightTargetDistance: 50.0,
+        lightDecay: 1.0,
+        lightAmbientPower: 0.15,
         lightDiffusePower: 0.25,
-        motion : function (deltaTime, model) {
-            // model.transform.addRotation(0, deltaTime * 100, 0);
-            // model.transform.setPosition(180 * Math.cos(animationParams.earthPosition) + 70, 0, -150 * Math.sin(animationParams.earthPosition));
-            // animationParams.earthPosition += deltaTime * 0.5;
+        motion : {
+            speed : .02,
+            translation: {
+                X : (position) => { return (-155 * Math.cos(position))*12},
+                Y : (position) => { return 0},
+                Z : (position) => { return (-150 * Math.sin(position))*12 },
+            },
+            rotation: {
+                X : (dt) => { return 0},
+                Y : (dt) => { return 50 * dt},
+                Z : (dt) => { return 0},
+            }
         },
-        children : [ ]
+        parent : 'SUN'
     },
 ];

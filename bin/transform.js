@@ -6,7 +6,8 @@ class Transform {
         this.rotation = vec3.fromValues(0, 0, 0);
         this.matView = mat4.create();
         this.matNormal = mat3.create();
-
+        this.worldMatrix = mat4.create();
+        this.localMatrix = mat4.create();
         this.totalRotation = new Quaternion();
 
         this.forward = vec4.fromValues(0, 0, 0, 1);
@@ -17,6 +18,10 @@ class Transform {
     setPosition(x, y, z) {
         this.position = vec3.fromValues(x, y, z);
         return this;
+    }
+
+    getPosition(){
+        return this.position
     }
 
     setScale(x, y, z) {
@@ -33,6 +38,10 @@ class Transform {
 
         this.totalRotation = qz.mul(qx.mul(qy));
         return this;
+    }
+
+    setWorldMatrix(matrix){
+        this.worldMatrix = matrix;
     }
 
     addPosition(x, y, z) {
@@ -57,14 +66,18 @@ class Transform {
     }
 
     updateMatrix(useEulerAngles = false) {
+        mat4.identity(this.matView);
+
+        mat4.translate(this.matView, this.matView, this.position);
+        mat4.copy(this.localMatrix, this.matView);
+
+        mat4.multiply(this.matView, this.worldMatrix, this.matView);
+        mat4.multiply(this.localMatrix, this.worldMatrix, this.localMatrix);
+
         if(!useEulerAngles) {
-            mat4.identity(this.matView);
-            mat4.translate(this.matView, this.matView, this.position);
             mat4.multiply(this.matView, this.matView, this.totalRotation.toMatrix4());
             mat4.scale(this.matView, this.matView, this.scale);
         } else {
-            mat4.identity(this.matView);
-            mat4.translate(this.matView, this.matView, this.position);
             mat4.rotateX(this.matView, this.matView, utils.degToRad(this.rotation[0]));
             mat4.rotateZ(this.matView, this.matView, utils.degToRad(this.rotation[2]));
             mat4.rotateY(this.matView, this.matView, utils.degToRad(this.rotation[1]));

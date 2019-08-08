@@ -1,6 +1,6 @@
 class SkyBox extends Model{
 
-    constructor(gl,width = 1000,height = 1000,depth = 1000,x = 0,y = 0,z = 0) {
+    constructor(gl,width = 50000 ,height = 50000, depth = 50000, x = 0,y = 0,z = 0) {
         super(gl);
 
         // Setup the position of the Skybox
