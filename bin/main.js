@@ -14,7 +14,12 @@ function loadModels() {
 function initWebGL() {
     // Create the G_canvas and attach it to the body
     G_canvas = utils.createCanvas();
-    G_gl = canvas.getContext('webgl2');
+    G_gl = G_canvas.getContext('webgl2');
+
+    if(!G_gl) {
+        alert("WebGL 2.0 cannot be loaded");
+        return -1;
+    }
 
     /**
      *  WEBGL INITIALIZATION
@@ -37,7 +42,10 @@ function initWebGL() {
 
 function main() {
 
-    initWebGL();
+    let error = initWebGL();
+
+    if(error === -1)
+        return;
 
     // Create the Camera
     let camera = new Camera(G_gl, 45);
