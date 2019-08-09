@@ -1,6 +1,6 @@
 "use strict";
 
-const SERVER_PORT = process.env.port || 80;
+const SERVER_PORT = process.env.PORT || 8080;
 let express = require('express');
 let path = require('path');
 
@@ -22,5 +22,5 @@ app.use(function(err, req, res, next) {
 });
 
 app.listen(SERVER_PORT, function () {
-    console.log("The Server is now started");
+    console.log("The Server is now started at port: " + SERVER_PORT);
 });

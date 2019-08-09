@@ -2,6 +2,9 @@
   "name": "SolarSystem",
   "version": "1.0.0",
   "private": true,
+  "scripts": {
+    "start": "node app.js"
+  },
   "dependencies": {
     "express": "~4.17.1"
   }
