@@ -1,2 +1,8 @@
 # Ignore .idea
 .idea/
+
+# Ignore Node.js Modules
+node_modules/
+
+# Ignore the file used to download packages
+package-lock.json
