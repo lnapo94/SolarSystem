@@ -8,6 +8,10 @@ let app = express();
 
 app.use(express.static(path.join(__dirname, './')));
 
+app.use('/', function (req, res) {
+    res.redirect('./index.html');
+});
+
 app.use(function(req, res) {
     res.send("404 - Not Found");
 });
