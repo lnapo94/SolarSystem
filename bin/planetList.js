@@ -377,7 +377,7 @@ let planetList = [
         position : {
             X : 0,
             Y : 0,
-            Z : -20
+            Z : 0
         },
         orientation : {
             X : 0,
@@ -396,9 +396,9 @@ let planetList = [
         motion : {
             speed : 0.06,
             translation: {
-                X : (position) => { return (-155 * Math.cos(position))*8},
+                X : (position) => { return 0},//(-155 * Math.cos(position))*8},
                 Y : (position) => { return 0},
-                Z : (position) => { return (-150 * Math.sin(position))*8 },
+                Z : (position) => { return 0}//(-150 * Math.sin(position))*8 },
             },
             rotation: {
                 X : (dt) => { return 15 * dt},
@@ -406,7 +406,7 @@ let planetList = [
                 Z : (dt) => { return 0},
             }
         },
-        parent : 'SUN'
+        parent : 'SATURN'
     },
     {
         name : "URANUS",
@@ -484,9 +484,9 @@ let planetList = [
         motion : {
             speed : 0.04,
             translation: {
-                X : (position) => { return (155 * Math.cos(position))*10},
+                X : (position) => { return 0},//(155 * Math.cos(position))*10},
                 Y : (position) => { return 0},
-                Z : (position) => { return (-150 * Math.sin(position))*10 },
+                Z : (position) => { return 0}//(-150 * Math.sin(position))*10 },
             },
             rotation: {
                 X : (dt) => { return 70 * dt},
@@ -494,7 +494,7 @@ let planetList = [
                 Z : (dt) => { return 0},
             }
         },
-        parent : 'SUN'
+        parent : 'URANUS'
     },
     {
         name : "NEPTUNE",
