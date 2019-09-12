@@ -11,7 +11,7 @@ class Camera{
         mat4.perspective(this.projectionMatrix, utils.degToRad(this.fov), this.ratio, this.near, this.far);
 
         this.transform = new Transform();		//Setup transform to control the position of the camera
-        this.viewMatrix = mat4.create();	//Cache the matrix that will hold the inverse of the transform.
+        this.cameraMatrix = mat4.create();	//Cache the matrix that will hold the inverse of the transform.
     }
 
     moveZ(direction) {
@@ -43,8 +43,8 @@ class Camera{
         this.transform.updateDirection();
 
         // Camera matrix needs to be inveerted in order to work properly
-        mat4.invert(this.viewMatrix, this.transform.matView);
-        return this.viewMatrix;
+        mat4.invert(this.cameraMatrix, this.transform.matView);
+        return this.cameraMatrix;
     }
 
     updateProjectionMatrix() {
@@ -55,13 +55,13 @@ class Camera{
     getFixedViewMatrix() {
         // Removes the translation part from the matrix, used with objects should stay fixed in the world
         // i.e. SkyBox
-        let mat = new Float32Array(this.viewMatrix);
+        let mat = new Float32Array(this.cameraMatrix);
         mat[12] = mat[13] = mat[14] = 0.0;
         return mat
     }
 
     getViewMatrix() {
-        return mat4.clone(this.viewMatrix);
+        return mat4.clone(this.cameraMatrix);
     }
 
     getProjectionMatrix() {
@@ -188,8 +188,8 @@ class CameraController {
         if(this.camera.fov > 70)
             this.camera.fov = 70;
 
-        if(this.camera.fov < 45)
-            this.camera.fov = 45;
+        if(this.camera.fov < 35)
+            this.camera.fov = 35;
     }
 
     onMouseMove(e){
