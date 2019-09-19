@@ -1,6 +1,6 @@
 # SolarSystem
 
-Project developed for the Computer Graphics course by [Alberto Floris](https://github.com/sirolf-otrebla) and [Luca Napoletano](https://github.com/lnapo94).
+Project developed for the Computer Graphics course @ **Politecnico di Milano** by [Alberto Floris](https://github.com/sirolf-otrebla) and [Luca Napoletano](https://github.com/lnapo94).
 
 ## The Project
 The topic is to develop a **WebGL** application to navigate and explore the Solar System. The user can navigate the space using the keyboard to move the camera around and the mouse to look around.
